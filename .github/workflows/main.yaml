@@ -3,7 +3,7 @@ name: "[MAIN] CI/CD Notify API"
 on:
   push:
     branches:
-      - main
+      - main----
 
 env:
   APP_NAME: bitsoft-notify

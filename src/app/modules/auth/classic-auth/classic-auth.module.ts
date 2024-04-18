@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ClassicAuthService } from '@/app/modules/classic-auth/services/classic-auth.service';
-import { ClassicAuthController } from '@/app/modules/classic-auth/controllers/classic-auth.controller';
+import { ClassicAuthService } from './services/classic-auth.service';
+import { ClassicAuthController } from './controllers/classic-auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClassicAuthEntity } from '@/app/modules/classic-auth/entities/classic-auth.entity';
+import { ClassicAuthEntity } from './entities/classic-auth.entity';
 import { UserEntity } from '@/app/modules/users/entities/user.entity';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { JwtModule } from '@nestjs/jwt';

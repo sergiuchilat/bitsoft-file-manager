@@ -1,4 +1,4 @@
-import { ClassicAuthModule } from '@/app/modules/classic-auth/classic-auth.module';
+import { ClassicAuthModule } from '@/app/modules/auth/classic-auth/classic-auth.module';
 
 export default [
   ClassicAuthModule

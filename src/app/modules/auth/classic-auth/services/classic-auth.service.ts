@@ -1,16 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ClassicAuthEntity } from '@/app/modules/classic-auth/entities/classic-auth.entity';
-import { ClassicAuthRepository } from '@/app/modules/classic-auth/repositories/classic-auth.repository';
-import ClassicAuthRegisterPayloadDto from '@/app/modules/classic-auth/dto/classic-auth-register.payload.dto';
 import { compare, hash } from 'bcrypt';
-import ClassicAuthRegisterResponseDto from '@/app/modules/classic-auth/dto/classic-auth-register.response.dto';
 import { plainToInstance } from 'class-transformer';
-import ClassicAuthLoginPayloadDto from '@/app/modules/classic-auth/dto/classic-auth-login.payload.dto';
-import ClassicAuthLoginResponseDto from '@/app/modules/classic-auth/dto/classic-auth-login.response.dto';
 import { DataSource } from 'typeorm';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
+import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/entities/classic-auth.entity';
+import { ClassicAuthRepository } from '@/app/modules/auth/classic-auth/repositories/classic-auth.repository';
+import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.payload.dto';
+import ClassicAuthLoginResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.response.dto';
+import ClassicAuthRegisterPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.payload.dto';
+import ClassicAuthRegisterResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.response.dto';
 
 @Injectable ()
 export class ClassicAuthService {
