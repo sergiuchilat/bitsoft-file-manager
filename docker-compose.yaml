@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  #######  Database  #######
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    hostname: postgres
+    container_name: notify-db
+    profiles:
+      - all
+      - db
+      - app
+    env_file:
+      - .env.example
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - auth
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./data/dev/pg-data:/var/lib/postgresql/data
+
+  auth-api-build-local:
+    image: auth-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    profiles:
+      - all
+      - build-local
+
+  auth-api:
+    container_name: auth-api
+    #    image: ghcr.io/sergiuchilat/bitsoft-auth:dev.latest
+    image: auth-api
+    restart: always
+    env_file:
+      - .env
+    profiles:
+      - all
+      - api
+      - app
+    networks:
+      - auth
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      - postgres
+
+networks:
+  auth:
+    driver: bridge
