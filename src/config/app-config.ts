@@ -38,6 +38,9 @@ class AppConfigSingleton {
           },
         },
       },
+      session: {
+        secret: null,
+      },
     },
     authProviders: [],
     db: {

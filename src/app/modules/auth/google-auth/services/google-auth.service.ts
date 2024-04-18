@@ -1,59 +1,64 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
+import { GoogleUserDetails } from '@/app/modules/auth/google-auth/types/google-user-details.type';
+import { GoogleAuthRepository } from '@/app/modules/auth/google-auth/repositories/google-auth.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { GoogleAuthEntity } from '@/app/modules/auth/google-auth/entities/google-auth.entity';
+import { DataSource } from 'typeorm';
+import { UsersService } from '@/app/modules/users/services/users.service';
 
 @Injectable()
 export class GoogleAuthService {
-  async getNewAccessToken(refreshToken: string): Promise<string> {
-    try {
-      const response = await axios.post(
-        'https://accounts.google.com/o/oauth2/token',
-        {
-          client_id: process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          refresh_token: refreshToken,
-          grant_type: 'refresh_token',
-        },
-      );
-
-      return response.data.access_token;
-    } catch (error) {
-      throw new Error('Failed to refresh the access token.');
-    }
+  constructor (
+    private readonly dataSource: DataSource,
+    @InjectRepository(GoogleAuthEntity)
+    private readonly googleAuthRepository: GoogleAuthRepository,
+    private readonly usersService: UsersService,
+  ) {
   }
+  async validateUser(userDetails: GoogleUserDetails): Promise<any> {
+    console.log('GoogleAuthService.validateUser() userDetails: ', userDetails);
 
-  async getProfile(token: string) {
-    try {
-      return axios.get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`,
-      );
-    } catch (error) {
-      console.error('Failed to revoke the token:', error);
-    }
-  }
-
-  async isTokenExpired(token: string): Promise<boolean> {
-    try {
-      const response = await axios.get(
-        `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`,
-      );
-
-      const expiresIn = response.data.expires_in;
-
-      if (!expiresIn || expiresIn <= 0) {
-        return true;
+    const existingUser = await this.googleAuthRepository.findOne({
+      where: {
+        email: userDetails.email
       }
-    } catch (error) {
-      return true;
+    });
+
+    if (existingUser) {
+      return existingUser;
     }
+
+    return this.registerUser(userDetails);
   }
 
-  async revokeGoogleToken(token: string) {
+  async registerUser(userDetails: GoogleUserDetails): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner ();
+    await queryRunner.connect ();
+    await queryRunner.startTransaction ();
+    let registeredUser = null;
     try {
-      await axios.get(
-        `https://accounts.google.com/o/oauth2/revoke?token=${token}`,
-      );
-    } catch (error) {
-      console.error('Failed to revoke the token:', error);
+      const createdUserEntity = await this.usersService.create();
+      registeredUser = await this.googleAuthRepository.save({
+        email: userDetails.email,
+        name: userDetails.name,
+        google_id: userDetails.googleId,
+        user: createdUserEntity
+      });
+      await queryRunner.commitTransaction();
+    } catch (e){
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
     }
+
+    return registeredUser;
+  }
+
+  async findUser(id: number): Promise<any> {
+    return await this.googleAuthRepository.findOne({
+      where: {
+        id: id
+      }
+    });
   }
 }

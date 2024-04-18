@@ -30,6 +30,9 @@ export default class EnvConfigStrategy {
         security: {
           write_access_key: process.env.APP_SECURITY_ACCESS_KEY,
         },
+        session: {
+          secret: process.env.SESSION_SECRET,
+        },
         log: {
           custom: process.env.APP_LOG_CUSTOM === 'true',
           levels: {

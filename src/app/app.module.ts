@@ -6,15 +6,22 @@ import { SeedService } from '@/database/seeds/seed.service';
 import i18nConfig from '@/app/services/i18n-config';
 import TypeormConnector from '@/database/connectors/typeorm.connector';
 import { JwtService } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
-@Module({
-  imports: [...TypeormConnector, i18nConfig, ...AppModules, EventEmitterConfig],
+@Module ({
+  imports: [
+    ...TypeormConnector,
+    i18nConfig,
+    ...AppModules,
+    EventEmitterConfig,
+    PassportModule.register({session: true})
+  ],
   providers: [SeedService, JwtService],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    middlewares.forEach((middleware) => {
-      consumer.apply(middleware.guard).forRoutes(middleware.routes);
+  configure (consumer: MiddlewareConsumer) {
+    middlewares.forEach ((middleware) => {
+      consumer.apply (middleware.guard).forRoutes (middleware.routes);
     });
   }
 }

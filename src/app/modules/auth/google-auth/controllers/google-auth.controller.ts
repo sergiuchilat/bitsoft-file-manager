@@ -1,6 +1,7 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { GoogleOauthGuard } from '@/app/modules/auth/google-auth/guards/google-oauth.guard';
+import { Request } from 'express';
 
 @ApiTags('Google Authentication')
 @Controller({
@@ -8,7 +9,6 @@ import { GoogleOauthGuard } from '@/app/modules/auth/google-auth/guards/google-o
   path: '/auth/google'
 })
 export class GoogleAuthController {
-  constructor() {}
 
   @Get('login')
   @UseGuards(GoogleOauthGuard)
@@ -20,5 +20,20 @@ export class GoogleAuthController {
   @UseGuards(GoogleOauthGuard)
   handleRedirect() {
     return 'Google redirect';
+  }
+
+  @Get('status')
+  handleStatus(@Req() request: Request){
+
+    console.log(request.user);
+    if (request.user) {
+      return {
+        user: request.user,
+        message: 'User is logged in'
+      };
+    }
+    return {
+      message: 'User is not logged in'
+    };
   }
 }

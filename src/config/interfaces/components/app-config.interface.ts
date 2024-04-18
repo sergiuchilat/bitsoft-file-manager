@@ -9,6 +9,9 @@ export default interface AppConfigInterface {
   security: {
     write_access_key: string;
   };
+  session: {
+    secret: string;
+  };
   log: {
     custom: boolean;
     levels: {
@@ -16,4 +19,4 @@ export default interface AppConfigInterface {
       all: LogConfigInterface;
     };
   };
-}
+};

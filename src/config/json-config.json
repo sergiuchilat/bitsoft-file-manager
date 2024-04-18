@@ -17,6 +17,9 @@
           "maxFiles": "1d"
         }
       }
+    },
+    "session": {
+      "secret": "secret"
     }
   },
   "authProviders": [],

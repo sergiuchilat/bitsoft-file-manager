@@ -14,6 +14,9 @@ export default class JsonPlainConfigStrategy {
         security: {
           write_access_key: jsonPlainConfig.app.security.write_access_key,
         },
+        session: {
+          secret: jsonPlainConfig.app.session.secret,
+        },
         log: {
           custom: jsonPlainConfig.app.log.custom,
           levels: {
