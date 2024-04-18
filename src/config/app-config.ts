@@ -39,6 +39,7 @@ class AppConfigSingleton {
         },
       },
     },
+    authProviders: [],
     db: {
       host: null,
       port: null,

@@ -19,6 +19,7 @@
       }
     }
   },
+  "authProviders": [],
   "db": {
     "driver": "postgres",
     "host": "localhost",

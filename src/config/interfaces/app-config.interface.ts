@@ -7,6 +7,7 @@ import MailConfigInterface from '@/config/interfaces/components/mail-config.inte
 
 export default interface ConfigInterface {
   app: AppConfigInterface;
+  authProviders: any[];
   db: DbConfigInterface;
   jwt: JwtConfigInterface;
   docs: DocsConfigInterface;

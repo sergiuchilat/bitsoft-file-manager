@@ -44,6 +44,7 @@ export default class EnvConfigStrategy {
           },
         },
       },
+      authProviders: [],
       db: {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,

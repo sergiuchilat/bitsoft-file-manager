@@ -28,6 +28,7 @@ export default class JsonPlainConfigStrategy {
           },
         },
       },
+      authProviders: jsonPlainConfig.authProviders,
       db: {
         host: jsonPlainConfig.db.host,
         port: jsonPlainConfig.db.port.toString(),
