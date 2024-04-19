@@ -1,7 +1,8 @@
-import { Controller, Get, HttpStatus, Req, Res } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Req, Res, Session } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { VkAuthService } from '@/app/modules/auth/vk-auth/vk-auth.service';
+
 
 @ApiTags('VK Auth')
 @Controller({
@@ -19,11 +20,25 @@ export class VkAuthController {
   }
 
   @Get('complete')
-  async handleComplete(@Req() req: Request, @Res() res: Response) {
+  async handleComplete(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Session() session: Record<string, any>,
+  ) {
     const vkCode = req?.query?.code;
+    session.user = await this.vkAuthService.handleCompleteLogin(vkCode);
     res
       .status(HttpStatus.OK)
-      .send(await this.vkAuthService.handleCompleteLogin(vkCode));
+      .send('VK login complete');
+  }
+
+  @Get('status')
+  async getStatus(@Session() session: Record<string, any>) {
+
+    if (session.user) {
+      return this.vkAuthService.getAuthorizedUser (session.user);
+    }
+    throw new HttpException('User is not logged in', 401);
   }
 
 

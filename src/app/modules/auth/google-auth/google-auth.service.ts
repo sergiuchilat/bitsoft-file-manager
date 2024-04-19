@@ -14,8 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 export class GoogleAuthService {
   constructor (
     private readonly dataSource: DataSource,
-    @InjectRepository(GoogleAuthEntity)
-    private readonly googleAuthRepository: GoogleAuthRepository,
+    @InjectRepository(GoogleAuthEntity) private readonly googleAuthRepository: GoogleAuthRepository,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService
   ) {

@@ -6,14 +6,18 @@ import { VkAuthEntity } from '@/app/modules/auth/vk-auth/vk-auth.entity';
 import { VkAuthRepository } from '@/app/modules/auth/vk-auth/vk-auth.repository';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { DataSource } from 'typeorm';
+import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
+import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable ()
 export class VkAuthService {
   constructor (
     private readonly dataSource: DataSource,
+    @InjectRepository (VkAuthEntity) private readonly vkAuthRepository: VkAuthRepository,
     private readonly httpService: HttpService,
     private readonly userService: UsersService,
-    @InjectRepository (VkAuthEntity) private readonly vkAuthRepository: VkAuthRepository,
+    private readonly jwtService: JwtService
   ) {
   }
 
@@ -35,13 +39,11 @@ export class VkAuthService {
         '&scope=email&response_type=token'
       ].join ('');
 
-      this.httpService.axiosRef.post (accessTokenGetUrl,)
+      return this.httpService.axiosRef.post (accessTokenGetUrl,)
         .then (async (response) => {
-          console.log ('response', response.data);
           const userInfo =  await this.getUserInfo (response.data.access_token);
           console.log ('userInfo', userInfo);
-          await this.register(response.data.user_id);
-          return {};
+          return this.login(response.data.user_id);
         })
         .catch (error => {
           console.error ('error', error);
@@ -56,7 +58,6 @@ export class VkAuthService {
   private async getUserInfo (accessToken: string) {
     try {
       const userInfoGetUrl = 'https://api.vk.com/method/users.get?access_token=' + accessToken + '&fields=name_case&v=5.89';
-
       this.httpService.axiosRef.post (userInfoGetUrl,)
         .then (response => {
           return response.data;
@@ -70,11 +71,7 @@ export class VkAuthService {
     }
   }
 
-  async login () {
-    return 'login';
-  }
-
-  async register (vkId: number) {
+  async login (vkId: number) {
     const existingUser = await this.vkAuthRepository.findOne ({
       where: {
         vk_id: vkId,
@@ -107,5 +104,36 @@ export class VkAuthService {
     }
 
     return registeredUser;
+  }
+
+  async findUser(id: number): Promise<any> {
+    return await this.vkAuthRepository.findOne({
+      where: {
+        id: id
+      }
+    });
+  }
+
+  async getAuthorizedUser(user: any){
+    const existingUser = await this.vkAuthRepository.findOne({
+      where: {
+        vk_id: user.vk_id
+      },
+      relations: ['user']
+    });
+
+    return {
+      token: this.jwtService.sign(TokenGeneratorService.generatePayload(
+        existingUser.user.uuid,
+        AuthMethodsEnum.VK_OAUTH,
+        {
+          email: existingUser.email,
+          name: '',
+        }
+      ), {
+        secret: AppConfig.jwt.secret,
+        expiresIn: AppConfig.jwt.expiresIn
+      })
+    };
   }
 }

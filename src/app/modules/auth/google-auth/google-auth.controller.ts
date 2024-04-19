@@ -13,8 +13,7 @@ export class GoogleAuthController {
 
   constructor (
     private readonly googleAuthService: GoogleAuthService
-  ) {
-  }
+  ) {}
 
   @Get('login')
   @UseGuards(GoogleAuthGuard)
@@ -22,14 +21,15 @@ export class GoogleAuthController {
     return 'Google login';
   }
 
-  @Get('redirect')
+  @Get('complete')
   @UseGuards(GoogleAuthGuard)
-  handleRedirect() {
+  handleComplete() {
     return 'Google redirect';
   }
 
   @Get('status')
   getStatus(@Req() request: Request){
+    console.log('Request USER', request.user);
     if (request.user) {
       return this.googleAuthService.getAuthorizedUser(request.user);
     }

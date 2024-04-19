@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { VkAuthEntity } from '@/app/modules/auth/vk-auth/vk-auth.entity';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { UserEntity } from '@/app/modules/users/entities/user.entity';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 @Module ({
   imports: [
@@ -14,11 +14,20 @@ import { JwtModule } from '@nestjs/jwt';
       timeout: 5000,
       maxRedirects: 5,
     }),
-    TypeOrmModule.forFeature([
-      VkAuthEntity, UserEntity
+    TypeOrmModule.forFeature ([
+      VkAuthEntity,
+      UserEntity
     ])
   ],
-  providers: [VkAuthService, UsersService],
+  providers: [
+    {
+      provide: 'VK_AUTH_SERVICE',
+      useClass: VkAuthService
+    },
+    UsersService,
+    VkAuthService,
+    JwtService
+  ],
   controllers: [VkAuthController],
 })
 export class VkAuthModule {
