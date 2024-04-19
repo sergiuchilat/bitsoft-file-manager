@@ -6,6 +6,7 @@ import { v4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import AppConfig from '@/config/app-config';
+import UserInfo from '@/app/modules/common/user-info.interface';
 
 @Injectable ()
 export class UsersService {
@@ -24,13 +25,14 @@ export class UsersService {
     });
   }
 
-  async create (): Promise<UserEntity> {
+  async create (name = null): Promise<UserEntity> {
     return await this.usersRepository.save ({
       uuid: v4 (),
+      name: name || null
     });
   }
 
-  async generateToken (user: UserEntity, authMethod: AuthMethodsEnum): Promise<any> {
+  async generateToken (user: UserInfo, authMethod: AuthMethodsEnum): Promise<any> {
     const tokenPayload = {
       props: {
         authMethod: authMethod,

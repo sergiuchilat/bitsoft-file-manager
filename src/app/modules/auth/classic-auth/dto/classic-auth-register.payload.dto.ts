@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Length } from 'class-validator';
+import { IsOptional, Length } from 'class-validator';
 
 export default class ClassicAuthRegisterPayloadDto {
   @ApiProperty ({ example: 'mail@domain.com', description: 'Email' })
@@ -13,4 +13,11 @@ export default class ClassicAuthRegisterPayloadDto {
     message: 'Password must contain from $constraint1 to $constraint2 characters',
   })
     password: string;
+
+  @ApiProperty ({ example: 'John Doe', description: 'Name' })
+  @Length (1, 255, {
+    message: 'Name must contain from $constraint1 to $constraint2 characters',
+  })
+  @IsOptional()
+    name?: string;
 }

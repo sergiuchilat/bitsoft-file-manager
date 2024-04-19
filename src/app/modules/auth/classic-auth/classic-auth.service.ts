@@ -34,11 +34,13 @@ export class ClassicAuthService {
     });
     const passwordMatch = await compare (classicAuthLoginPayloadDto.password, existingUser?.password || '');
 
-    if(existingUser && passwordMatch) {
-      return this.usersService.generateToken(existingUser.user, AuthMethodsEnum.CLASSIC);
+    if (existingUser && passwordMatch) {
+      return this.usersService.generateToken ({
+        uuid: existingUser.user.uuid
+      }, AuthMethodsEnum.CLASSIC);
     }
 
-    throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    throw new HttpException ('Invalid credentials', HttpStatus.UNAUTHORIZED);
   }
 
   async register (classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto): Promise<ClassicAuthRegisterResponseDto> {
@@ -48,23 +50,18 @@ export class ClassicAuthService {
     let registeredUser = null;
 
     try {
-
-      console.log('AppConfig.authProviders.classic.code_expires_in', AppConfig.authProviders.classic.code_expires_in);
-      console.log('Date.now()', new Date(Date.now()));
-      console.log('Expires', new Date (Date.now () + AppConfig.authProviders.classic.code_expires_in));
-      const createdUserEntity = await this.usersService.create();
+      const createdUserEntity = await this.usersService.create (classicAuthRegisterPayloadDto.name);
       registeredUser = await queryRunner.manager.save (ClassicAuthEntity, {
         ...classicAuthRegisterPayloadDto,
         password: await this.encodePassword (classicAuthRegisterPayloadDto.password),
         activation_code: v4 (),
-        activation_code_expires: new Date (new Date().getTime() + AppConfig.authProviders.classic.code_expires_in),
+        activation_code_expires: new Date (new Date ().getTime () + AppConfig.authProviders.classic.code_expires_in),
         user: createdUserEntity,
       });
       await queryRunner.commitTransaction ();
     } catch (e) {
-      console.log ('Auth classic error', e);
       await queryRunner.rollbackTransaction ();
-      throw new HttpException('Error registering user', HttpStatus.CONFLICT);
+      throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
     } finally {
       await queryRunner.release ();
     }
@@ -77,9 +74,9 @@ export class ClassicAuthService {
 
   async activate (token: string) {
 
-    await this.classicAuthRepository.delete({
+    await this.classicAuthRepository.delete ({
       status: AuthMethodStatusEnum.NEW,
-      created_at: LessThan(new Date(new Date().getTime() -  AppConfig.authProviders.classic.code_expires_in * 1000))
+      created_at: LessThan (new Date (new Date ().getTime () - AppConfig.authProviders.classic.code_expires_in * 1000))
     });
 
     const result = await this.classicAuthRepository.update ({
@@ -89,10 +86,10 @@ export class ClassicAuthService {
       status: AuthMethodStatusEnum.ACTIVE
     });
 
-    console.log('Activate result', result);
+    console.log ('Activate result', result);
 
-    if(!result.affected){
-      throw new HttpException('Invalid token', HttpStatus.NOT_FOUND);
+    if (!result.affected) {
+      throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
     }
 
     return {

@@ -11,12 +11,10 @@ export class SessionSerializer extends PassportSerializer {
   }
 
   serializeUser(user: any, done: CallableFunction): void {
-    console.log('serializeUser', user);
     done(null, user);
   }
 
   async deserializeUser(payload: any, done: CallableFunction){
-    console.log('deserializeUser', payload);
     const user = await this.googleAuthService.findUser(payload.id);
     if (!user) {
       done('User not found', null);

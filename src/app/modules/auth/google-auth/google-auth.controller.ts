@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpException, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { GoogleAuthGuard } from '@/app/modules/auth/google-auth/google-auth.guard';
 import { Request } from 'express';
@@ -23,17 +23,12 @@ export class GoogleAuthController {
   }
 
   @Get('status')
-  handleStatus(@Req() request: Request){
-
-    console.log(request.user);
+  getStatus(@Req() request: Request){
     if (request.user) {
       return {
-        user: request.user,
-        message: 'User is logged in'
+        user: request.user
       };
     }
-    return {
-      message: 'User is not logged in'
-    };
+    throw new HttpException('User is not logged in', 401);
   }
 }

@@ -16,8 +16,6 @@ export class GoogleAuthService {
   ) {
   }
   async validateUser(userDetails: GoogleUserDetails): Promise<any> {
-    console.log('GoogleAuthService.validateUser() userDetails: ', userDetails);
-
     const existingUser = await this.googleAuthRepository.findOne({
       where: {
         email: userDetails.email
