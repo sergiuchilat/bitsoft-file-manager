@@ -1,34 +1,29 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '@/app/modules/users/entities/user.entity';
 
-@Entity ('auth_credentials_google')
-export class GoogleAuthEntity {
-  @PrimaryGeneratedColumn ()
+@Entity({
+  name: 'auth_credentials_vk'
+})
+export class VkAuthEntity {
+  @PrimaryGeneratedColumn()
     id: number;
 
-  @Column ({
+  @Column({
     length: 255,
     unique: true,
-    nullable: false,
+    nullable: true,
   })
     email: string;
-
-  @Column ({
-    length: 128,
-    nullable: false,
-  })
-    name: string;
-
-  @Column ({
-    length: 255,
-    nullable: false,
-  })
-    google_id: string;
 
   @Column({
     nullable: false,
   })
     user_id: number;
+
+  @Column({
+    nullable: false,
+  })
+    vk_id: number;
 
   @OneToOne(() => UserEntity, (user) => user.id)
   @JoinColumn({
@@ -36,4 +31,5 @@ export class GoogleAuthEntity {
     referencedColumnName: 'id'
   })
     user: UserEntity;
+
 }
