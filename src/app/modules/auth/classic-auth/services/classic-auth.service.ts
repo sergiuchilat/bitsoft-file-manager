@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
-import { DataSource, MoreThan } from 'typeorm';
+import { DataSource, LessThan } from 'typeorm';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/entities/classic-auth.entity';
@@ -76,10 +76,15 @@ export class ClassicAuthService {
   }
 
   async activate (token: string) {
+
+    await this.classicAuthRepository.delete({
+      status: AuthMethodStatusEnum.NEW,
+      created_at: LessThan(new Date(new Date().getTime() -  AppConfig.authProviders.classic.code_expires_in * 1000))
+    });
+
     const result = await this.classicAuthRepository.update ({
       activation_code: token,
-      status: AuthMethodStatusEnum.NEW,
-      //created_at: MoreThan(new Date(new Date().getTime() - AppConfig.authProviders.classic.code_expires_in * 1000)),
+      status: AuthMethodStatusEnum.NEW
     }, {
       status: AuthMethodStatusEnum.ACTIVE
     });
