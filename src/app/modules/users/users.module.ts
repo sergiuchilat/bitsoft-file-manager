@@ -11,7 +11,7 @@ import { ClassicAuthController } from '@/app/modules/auth/classic-auth/classic-a
       ClassicAuthEntity
     ])
   ],
-  providers: [ClassicAuthService, JwtService],
+  providers: [ClassicAuthService],
   controllers: [ClassicAuthController]
 })
 export class UsersModule {

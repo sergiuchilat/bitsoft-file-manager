@@ -5,20 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClassicAuthEntity } from './classic-auth.entity';
 import { UserEntity } from '@/app/modules/users/entities/user.entity';
 import { UsersService } from '@/app/modules/users/services/users.service';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       ClassicAuthEntity,
       UserEntity
-    ]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_TOKEN_EXPIRES_IN }
-    })
+    ])
   ],
-  providers: [ClassicAuthService, UsersService],
+  providers: [ClassicAuthService, UsersService, JwtService],
   controllers: [ClassicAuthController]
 })
 export class ClassicAuthModule {}

@@ -5,6 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GoogleAuthEntity } from '@/app/modules/auth/google-auth/google-auth.entity';
 import { DataSource } from 'typeorm';
 import { UsersService } from '@/app/modules/users/services/users.service';
+import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
+import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
+import AppConfig from '@/config/app-config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class GoogleAuthService {
@@ -13,6 +17,7 @@ export class GoogleAuthService {
     @InjectRepository(GoogleAuthEntity)
     private readonly googleAuthRepository: GoogleAuthRepository,
     private readonly usersService: UsersService,
+    private readonly jwtService: JwtService
   ) {
   }
   async validateUser(userDetails: GoogleUserDetails): Promise<any> {
@@ -58,5 +63,28 @@ export class GoogleAuthService {
         id: id
       }
     });
+  }
+
+  async getAuthorizedUser(user: any){
+    const existingUser = await this.googleAuthRepository.findOne({
+      where: {
+        email: user.email
+      },
+      relations: ['user']
+    });
+
+    return {
+      token: this.jwtService.sign(TokenGeneratorService.generatePayload(
+        existingUser.user.uuid,
+        AuthMethodsEnum.GOOGLE_OAUTH,
+        {
+          email: existingUser.email,
+          name: existingUser.name,
+        }
+      ), {
+        secret: AppConfig.jwt.secret,
+        expiresIn: AppConfig.jwt.expiresIn
+      })
+    };
   }
 }

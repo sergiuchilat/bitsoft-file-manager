@@ -16,11 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     TypeOrmModule.forFeature([
       VkAuthEntity, UserEntity
-    ]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_TOKEN_EXPIRES_IN }
-    })
+    ])
   ],
   providers: [VkAuthService, UsersService],
   controllers: [VkAuthController],

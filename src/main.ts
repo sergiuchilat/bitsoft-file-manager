@@ -30,7 +30,6 @@ async function bootstrap () {
     type: VersioningType.URI,
   });
   app.enableCors ();
-  console.log('AppConfig.app.session.secret', AppConfig.app.session.secret);
   app.use(
     session({
       secret: AppConfig.app.session.secret,

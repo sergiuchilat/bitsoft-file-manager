@@ -9,8 +9,6 @@ dotenv.config();
 export default class EnvConfigStrategy {
   private readonly config: AppConfigInterface = null;
 
-
-
   constructor() {
     //console.log('process ENV', process.env);
     let JWT_PUBLIC_KEY = '';
@@ -74,7 +72,7 @@ export default class EnvConfigStrategy {
       },
       jwt: {
         secret: process.env.JWT_SECRET_KEY,
-        expiresIn: process.env.JWT_TOKEN_EXPIRES_IN,
+        expiresIn: Number(process.env.JWT_TOKEN_EXPIRES_IN),
         publicKeyPath: process.env.JWT_PUBLIC_KEY_PATH,
         publicKey: JWT_PUBLIC_KEY,
         privateKeyPath: process.env.JWT_PRIVATE_KEY_PATH,
