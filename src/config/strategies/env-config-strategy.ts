@@ -47,7 +47,16 @@ export default class EnvConfigStrategy {
           },
         },
       },
-      authProviders: [],
+      authProviders: {
+        classic: {
+          code_expires_in: Number(process.env.CLASSIC_AUTH_CODE_EXPIRES_IN),
+        },
+        google: {
+          clientId: process.env.GOOGLE_AUTH_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
+          redirectURL: process.env.GOOGLE_AUTH_REDIRECT_URL,
+        }
+      },
       db: {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,

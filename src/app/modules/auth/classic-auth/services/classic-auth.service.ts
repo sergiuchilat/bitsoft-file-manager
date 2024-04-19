@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
-import { DataSource } from 'typeorm';
+import { DataSource, MoreThan } from 'typeorm';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/entities/classic-auth.entity';
@@ -11,6 +11,9 @@ import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/clas
 import ClassicAuthLoginResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.response.dto';
 import ClassicAuthRegisterPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.payload.dto';
 import ClassicAuthRegisterResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.response.dto';
+import { v4 } from 'uuid';
+import AppConfig from '@/config/app-config';
+import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -23,7 +26,6 @@ export class ClassicAuthService {
   }
 
   async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto): Promise<ClassicAuthLoginResponseDto> {
-
     const existingUser = await this.classicAuthRepository.findOne ({
       where: {
         email: classicAuthLoginPayloadDto.email
@@ -46,11 +48,17 @@ export class ClassicAuthService {
     let registeredUser = null;
 
     try {
+
+      console.log('AppConfig.authProviders.classic.code_expires_in', AppConfig.authProviders.classic.code_expires_in);
+      console.log('Date.now()', new Date(Date.now()));
+      console.log('Expires', new Date (Date.now () + AppConfig.authProviders.classic.code_expires_in));
       const createdUserEntity = await this.usersService.create();
       registeredUser = await queryRunner.manager.save (ClassicAuthEntity, {
         ...classicAuthRegisterPayloadDto,
         password: await this.encodePassword (classicAuthRegisterPayloadDto.password),
-        user: createdUserEntity
+        activation_code: v4 (),
+        activation_code_expires: new Date (new Date().getTime() + AppConfig.authProviders.classic.code_expires_in),
+        user: createdUserEntity,
       });
       await queryRunner.commitTransaction ();
     } catch (e) {
@@ -65,6 +73,27 @@ export class ClassicAuthService {
       ClassicAuthRegisterResponseDto,
       registeredUser
     );
+  }
+
+  async activate (token: string) {
+    const result = await this.classicAuthRepository.update ({
+      activation_code: token,
+      status: AuthMethodStatusEnum.NEW,
+      //created_at: MoreThan(new Date(new Date().getTime() - AppConfig.authProviders.classic.code_expires_in * 1000)),
+    }, {
+      status: AuthMethodStatusEnum.ACTIVE
+    });
+
+    console.log('Activate result', result);
+
+    if(!result.affected){
+      throw new HttpException('Invalid token', HttpStatus.NOT_FOUND);
+    }
+
+    return {
+      token: token,
+      status: AuthMethodStatusEnum.ACTIVE
+    };
   }
 
   private async encodePassword (password: string) {

@@ -2,6 +2,7 @@ import { PassportStrategy} from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import { Inject, Injectable } from '@nestjs/common';
 import { GoogleAuthService } from '@/app/modules/auth/google-auth/services/google-auth.service';
+import AppConfig from '@/config/app-config';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy){
@@ -9,9 +10,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy){
     @Inject('GOOGLE_AUTH_SERVICE') private readonly googleAuthService: GoogleAuthService
   ) {
     super ({
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_REDIRECT_URL,
+      clientID: AppConfig.authProviders.google.clientId,
+      clientSecret: AppConfig.authProviders.google.clientSecret,
+      callbackURL: AppConfig.authProviders.google.redirectURL,
       scope: ['email', 'profile'],
     });
   }

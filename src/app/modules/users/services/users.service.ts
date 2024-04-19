@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '@/app/modules/users/entities/user.entity';
 import { UsersRepository } from '@/app/modules/users/repositories/users.repository';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import AppConfig from '@/config/app-config';
@@ -26,7 +26,7 @@ export class UsersService {
 
   async create (): Promise<UserEntity> {
     return await this.usersRepository.save ({
-      uuid: uuidv4 (),
+      uuid: v4 (),
     });
   }
 

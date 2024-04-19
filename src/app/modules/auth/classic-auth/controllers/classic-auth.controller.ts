@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from '../services/classic-auth.service';
 import ClassicAuthRegisterPayloadDto from '../dto/classic-auth-register.payload.dto';
@@ -36,4 +36,15 @@ export class ClassicAuthController {
       .status (HttpStatus.CREATED)
       .send (await this.classicAuthService.register (classicAuthRegisterPayloadDto));
   }
+
+  @Get ('activate/:token')
+  async activate (
+    @Res () response: Response,
+    @Param ('token', ParseUUIDPipe) token: string,
+  ) {
+    response
+      .status (HttpStatus.OK)
+      .send (await this.classicAuthService.activate (token));
+  }
+
 }

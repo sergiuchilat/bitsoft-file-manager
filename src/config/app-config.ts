@@ -3,88 +3,19 @@ import EnvConfigStrategy from './strategies/env-config-strategy';
 import AppConfigValidator from './validators/app-config.validator';
 import DbConfigValidator from './validators/db-config.validator';
 import DocsConfigValidator from './validators/docs-config.validator';
-import JsonPlainConfigStrategy from './strategies/json-plain-config-strategy';
 
 export enum AppConfigStrategies {
-  env = 'env',
-  json = 'json',
+  env = 'env'
 }
 
 class AppConfigSingleton {
   private static instance = null;
 
   private readonly configStrategies = {
-    env: new EnvConfigStrategy(),
-    json: new JsonPlainConfigStrategy(),
+    env: new EnvConfigStrategy()
   };
 
-  private config: AppConfigInterface = {
-    app: {
-      port: null,
-      requestTimeout: 0,
-      security: {
-        write_access_key: null,
-      },
-      log: {
-        custom: false,
-        levels: {
-          error: {
-            filename: null,
-            maxFiles: null,
-          },
-          all: {
-            filename: null,
-            maxFiles: null,
-          },
-        },
-      },
-      session: {
-        secret: null,
-      },
-    },
-    authProviders: [],
-    db: {
-      host: null,
-      port: null,
-      user: null,
-      password: null,
-      name: null,
-      driver: null,
-      url: null,
-    },
-    jwt: {
-      secret: null,
-      expiresIn: null,
-      privateKeyPath: null,
-      privateKey: null,
-      publicKeyPath: null,
-      publicKey: null,
-    },
-    docs: {
-      generate: false,
-      path: null,
-      version: null,
-      title: null,
-      description: null,
-      authName: null,
-    },
-    telegram: {
-      botName: null,
-      botToken: null,
-    },
-    mail: {
-      mailer: null,
-      host: null,
-      port: null,
-      username: null,
-      password: null,
-      encryption: null,
-      fromAddress: null,
-      fromName: null,
-      retryAttempts: null,
-      cronTimeout: null,
-    },
-  };
+  private config: AppConfigInterface = null;
 
   public static getInstance(): AppConfigSingleton {
     return this.instance || (this.instance = new this());
