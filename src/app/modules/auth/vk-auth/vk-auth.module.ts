@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { VkAuthController } from '@/app/modules/auth/vk-auth/controllers/vk-auth.controller';
+import { VkAuthController } from '@/app/modules/auth/vk-auth/vk-auth.controller';
 import { HttpModule } from '@nestjs/axios';
-import { VkAuthService } from '@/app/modules/auth/vk-auth/services/vk-auth.service';
+import { VkAuthService } from '@/app/modules/auth/vk-auth/vk-auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { VkAuthEntity } from '@/app/modules/auth/vk-auth/entities/vk-auth.entity';
+import { VkAuthEntity } from '@/app/modules/auth/vk-auth/vk-auth.entity';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { UserEntity } from '@/app/modules/users/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';

@@ -1,6 +1,6 @@
 import { PassportSerializer } from '@nestjs/passport';
 import { Inject, Injectable } from '@nestjs/common';
-import { GoogleAuthService } from '@/app/modules/auth/google-auth/services/google-auth.service';
+import { GoogleAuthService } from '@/app/modules/auth/google-auth/google-auth.service';
 
 @Injectable()
 export class SessionSerializer extends PassportSerializer {

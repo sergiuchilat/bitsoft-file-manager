@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import AppConfig from '@/config/app-config';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
-import { VkAuthEntity } from '@/app/modules/auth/vk-auth/entities/vk-auth.entity';
-import { VkAuthRepository } from '@/app/modules/auth/vk-auth/repositories/vk-auth.repository';
+import { VkAuthEntity } from '@/app/modules/auth/vk-auth/vk-auth.entity';
+import { VkAuthRepository } from '@/app/modules/auth/vk-auth/vk-auth.repository';
 import { UsersService } from '@/app/modules/users/services/users.service';
 import { DataSource } from 'typeorm';
 

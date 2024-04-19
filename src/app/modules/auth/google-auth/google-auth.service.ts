@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { GoogleUserDetails } from '@/app/modules/auth/google-auth/types/google-user-details.type';
-import { GoogleAuthRepository } from '@/app/modules/auth/google-auth/repositories/google-auth.repository';
+import { GoogleUserDetails } from '@/app/modules/auth/google-auth/google-user-details.type';
+import { GoogleAuthRepository } from '@/app/modules/auth/google-auth/google-auth.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GoogleAuthEntity } from '@/app/modules/auth/google-auth/entities/google-auth.entity';
+import { GoogleAuthEntity } from '@/app/modules/auth/google-auth/google-auth.entity';
 import { DataSource } from 'typeorm';
 import { UsersService } from '@/app/modules/users/services/users.service';
 

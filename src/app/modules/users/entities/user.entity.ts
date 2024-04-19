@@ -1,5 +1,5 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/entities/classic-auth.entity';
+import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 
 @Entity('users')
 export class UserEntity {
