@@ -47,4 +47,14 @@ export class ClassicAuthController {
       .send (await this.classicAuthService.activate (token));
   }
 
+  @Post ('activate/resend')
+  resendActivationEmail () {
+    return 'resendActivationEmail';
+  }
+
+  @Post ('password/reset')
+  resetPassword () {
+    return 'resetPassword';
+  }
+
 }

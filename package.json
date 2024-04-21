@@ -65,6 +65,7 @@
     "move-file": "^3.1.0",
     "nestjs-i18n": "^10.3.7",
     "nestjs-typeorm-paginate": "^4.0.2",
+    "node-html-parser": "^6.1.13",
     "node-telegram-bot-api": "^0.63.0",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
