@@ -1,14 +1,14 @@
-name: "[DEV] CI/CD Notify API"
+name: "[DEV] CI/CD Auth Provider API"
 
 on:
   push:
     branches:
-      - dev----
+      - dev
 
 env:
-  APP_NAME: bitsoft-notify
-  APP_VERSION: "v1.0.1-beta"
-  NETWORK: nest-notify
+  APP_NAME: bitsoft-auth-provider
+  APP_VERSION: "v1.0.0-beta"
+  NETWORK: auth-provider
 
 jobs:
   build:

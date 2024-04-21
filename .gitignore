@@ -11,4 +11,5 @@ data
 config/deploy/**/secrets.*
 .env
 .envrc
-jwt
+jwt/jwt.key
+jwt/jwt.key.pub
