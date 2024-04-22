@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { VkAuthService } from '@/app/modules/auth/vk-auth/vk-auth.service';
 
 
-@ApiTags('VK Auth')
+@ApiTags('Auth: VK')
 @Controller({
   version: '1',
   path: 'auth/vk',

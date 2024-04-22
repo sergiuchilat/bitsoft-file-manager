@@ -5,7 +5,7 @@ import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
 import ClassicAuthLoginPayloadDto from './dto/classic-auth-login.payload.dto';
 
-@ApiTags ('Classic Auth')
+@ApiTags ('Auth: Classic')
 @Controller ({
   version: '1',
   path: 'auth/classic',

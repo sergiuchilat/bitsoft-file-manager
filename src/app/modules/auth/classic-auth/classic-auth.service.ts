@@ -6,7 +6,6 @@ import { DataSource } from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { ClassicAuthRepository } from '@/app/modules/auth/classic-auth/classic-auth.repository';
 import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.payload.dto';
-import ClassicAuthLoginResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.response.dto';
 import ClassicAuthRegisterPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.payload.dto';
 import ClassicAuthRegisterResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.response.dto';
 import AppConfig from '@/config/app-config';
@@ -14,10 +13,10 @@ import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.en
 import { JwtService } from '@nestjs/jwt';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
-import { HttpService } from '@nestjs/axios';
 import { MailerService } from '@/app/modules/auth/classic-auth/mailer.service';
 import { UsersService } from '@/app/modules/users/users.service';
 import { plainToInstance } from 'class-transformer';
+import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.dto';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -31,7 +30,7 @@ export class ClassicAuthService {
   ) {
   }
 
-  async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto): Promise<ClassicAuthLoginResponseDto> {
+  async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto): Promise<AuthLoginResponseDto> {
     const existingUser = await this.classicAuthRepository.findOne ({
       where: {
         email: classicAuthLoginPayloadDto.email
@@ -52,7 +51,8 @@ export class ClassicAuthService {
         ), {
           secret: AppConfig.jwt.secret,
           expiresIn: AppConfig.jwt.expiresIn
-        })
+        }),
+        refresh_token: null
       };
     }
 

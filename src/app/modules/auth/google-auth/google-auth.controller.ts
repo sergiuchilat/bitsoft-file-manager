@@ -4,7 +4,7 @@ import { GoogleAuthGuard } from '@/app/modules/auth/google-auth/google-auth.guar
 import { Request } from 'express';
 import { GoogleAuthService } from '@/app/modules/auth/google-auth/google-auth.service';
 
-@ApiTags('Google Auth')
+@ApiTags('Auth: Google')
 @Controller({
   version: '1',
   path: '/auth/google'
