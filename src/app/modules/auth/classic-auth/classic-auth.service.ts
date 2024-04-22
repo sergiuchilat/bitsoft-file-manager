@@ -2,9 +2,7 @@ import { v4 } from 'uuid';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
-import { plainToInstance } from 'class-transformer';
 import { DataSource } from 'typeorm';
-import { UsersService } from '@/app/modules/users/services/users.service';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { ClassicAuthRepository } from '@/app/modules/auth/classic-auth/classic-auth.repository';
 import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.payload.dto';
@@ -16,9 +14,10 @@ import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.en
 import { JwtService } from '@nestjs/jwt';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
-import * as fs from 'node:fs';
-import parse from 'node-html-parser';
 import { HttpService } from '@nestjs/axios';
+import { MailerService } from '@/app/modules/auth/classic-auth/mailer.service';
+import { UsersService } from '@/app/modules/users/users.service';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -28,7 +27,7 @@ export class ClassicAuthService {
     private readonly usersService: UsersService,
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
-    private readonly httpService: HttpService
+    private readonly mailerService: MailerService,
   ) {
   }
 
@@ -43,7 +42,7 @@ export class ClassicAuthService {
 
     if (existingUser && passwordMatch) {
       return {
-        token: this.jwtService.sign(TokenGeneratorService.generatePayload(
+        token: this.jwtService.sign (TokenGeneratorService.generatePayload (
           existingUser.user.uuid,
           AuthMethodsEnum.CLASSIC,
           {
@@ -66,13 +65,14 @@ export class ClassicAuthService {
     await queryRunner.startTransaction ();
     let registeredUser = null;
     let success = false;
+    const activationCode = v4 ();
 
     try {
       const createdUserEntity = await this.usersService.create (classicAuthRegisterPayloadDto.name);
       registeredUser = await queryRunner.manager.save (ClassicAuthEntity, {
         ...classicAuthRegisterPayloadDto,
         password: await this.encodePassword (classicAuthRegisterPayloadDto.password),
-        activation_code: v4 (),
+        activation_code: activationCode,
         user: createdUserEntity,
       });
       await queryRunner.commitTransaction ();
@@ -83,8 +83,12 @@ export class ClassicAuthService {
     } finally {
       await queryRunner.release ();
 
-      if(success) {
-        await this.sendActivationEmail (classicAuthRegisterPayloadDto.email);
+      if (success) {
+        await this.mailerService.sendActivationEmail (
+          classicAuthRegisterPayloadDto.email,
+          classicAuthRegisterPayloadDto.name,
+          this.generateActivationLink(activationCode)
+        );
       }
     }
 
@@ -94,53 +98,21 @@ export class ClassicAuthService {
     );
   }
 
-  async sendActivationEmail (email: string) {
-    const notifyServiceUrl = process.env.NOTIFY_SERVICE_URL;
-    const notifyServiceApiKey = process.env.NOTIFY_SERVICE_KEY;
-    const notifyServiceTemplate = 'registration-confirmation';
-
-    const templateData = fs.readFileSync(`src/data/email-templates/${notifyServiceTemplate}/en.html`, 'utf8');
-
-    const emailBody = templateData
-      .replaceAll('{PROJECT_NAME}', 'Project Name')
-      .replaceAll('{IMAGE_URL}', 'https://via.placeholder.com/150')
-      .replaceAll('{USER_FULL_NAME}', 'User Full Name')
-      .replaceAll('{CONFIRM_LINK}', 'http://localhost:3000/activate/123456')
-      .replaceAll('{PROJECT_URL}', 'http://localhost:3000');
-
-    try {
-      const notifySendUrl = `${notifyServiceUrl}/api/v1/notifications/mail`;
-      this.httpService.axiosRef.post (notifySendUrl, {
-        'subject': parse(emailBody).querySelector('title').text,
-        'body': parse(emailBody).querySelector('body').innerHTML,
-        'language': 'en',
-        'receivers': [email]
-      }, {
-        headers: {
-          'x-api-key': `${notifyServiceApiKey}`
-        }
-      })
-        .then (response => {
-          return response.data;
-        })
-        .catch (error => {
-          console.error ('error', error);
-          return error;
-        });
-    } catch (e) {
-      console.error (e);
-    }
-    console.log('BODY', emailBody);
-
-    return emailBody;
-  }
-
   async activate (token: string) {
 
     // await this.classicAuthRepository.delete ({
     //   status: AuthMethodStatusEnum.NEW,
-    //   created_at: LessThan (new Date (new Date ().getTime () - AppConfig.authProviders.classic.code_expires_in * 1000))
-    // });
+    //   created_at: LessThan (new Date (new Date ().getTime () - AppConfig.authProviders.classic.code_expires_in *
+    // 1000)) });
+
+    // const test = await this.classicAuthRepository.find({
+    //   where: {
+    //     status: AuthMethodStatusEnum.NEW,
+    //     created_at: LessThan (new Date (new Date ().getTime () - AppConfig.authProviders.classic.code_expires_in *
+    //       1000))
+    //   }});
+    //
+    // console.log('test', test);
 
     const result = await this.classicAuthRepository.update ({
       activation_code: token,
@@ -159,7 +131,48 @@ export class ClassicAuthService {
     };
   }
 
+  async startResetPassword (email: string) {
+    const user = await this.classicAuthRepository.findOne ({
+      where: {
+        email: email
+      }
+    });
+
+    if (!user) {
+      throw new HttpException ('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const resetCode = v4 ();
+
+    await this.classicAuthRepository.update ({
+      email: email
+    }, {
+      reset_password_code: resetCode
+    });
+
+    await this.mailerService.sendResetPasswordEmail (
+      email,
+      user.user.name,
+      this.generateResetPasswordLink (resetCode)
+    );
+
+    return {
+      email: email,
+      status: AuthMethodStatusEnum.NEW
+    };
+  }
+
   private async encodePassword (password: string) {
     return await hash (password, 10);
+  }
+
+  private generateActivationLink (token: string) {
+    return process.env.CLASSIC_AUTH_ACTIVATION_LINK
+      .replace ('{token}', token);
+  }
+
+  private generateResetPasswordLink (token: string) {
+    return process.env.CLASSIC_AUTH_RESET_PASSWORD_LINK
+      .replace ('{token}', token);
   }
 }

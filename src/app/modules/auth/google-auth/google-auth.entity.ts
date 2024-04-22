@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from '@/app/modules/users/entities/user.entity';
+import { UserEntity } from '@/app/modules/users/user.entity';
 
 @Entity ('auth_credentials_google')
 export class GoogleAuthEntity {

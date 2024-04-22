@@ -4,11 +4,12 @@ import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VkAuthEntity } from '@/app/modules/auth/vk-auth/vk-auth.entity';
 import { VkAuthRepository } from '@/app/modules/auth/vk-auth/vk-auth.repository';
-import { UsersService } from '@/app/modules/users/services/users.service';
+
 import { DataSource } from 'typeorm';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
 import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '@/app/modules/users/users.service';
 
 @Injectable ()
 export class VkAuthService {

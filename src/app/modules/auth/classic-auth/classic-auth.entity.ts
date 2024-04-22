@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from '@/app/modules/users/entities/user.entity';
 import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
+import { UserEntity } from '@/app/modules/users/user.entity';
 
 @Entity('auth_credentials_classic')
 export class ClassicAuthEntity {
@@ -31,6 +31,12 @@ export class ClassicAuthEntity {
     length: 36
   })
     activation_code: string;
+
+  @Column({
+    nullable: true,
+    length: 36
+  })
+    reset_password_code: string;
 
   @Column({
     nullable: false,
