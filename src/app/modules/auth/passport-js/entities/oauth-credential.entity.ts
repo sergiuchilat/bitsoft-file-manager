@@ -1,29 +1,24 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '@/app/modules/users/user.entity';
+import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
 
 @Entity({
-  name: 'auth_credentials_vk'
+  name: 'credentials_oauth',
 })
-export class VkAuthEntity {
+export class OauthCredentialEntity {
   @PrimaryGeneratedColumn()
-    id: number;
+    id: string;
 
-  @Column({
+  @Column ({
     length: 255,
     unique: true,
     nullable: true,
   })
     email: string;
-
   @Column({
     nullable: false,
   })
     user_id: number;
-
-  @Column({
-    nullable: false,
-  })
-    vk_id: number;
 
   @OneToOne(() => UserEntity, (user) => user.id)
   @JoinColumn({
@@ -32,4 +27,20 @@ export class VkAuthEntity {
   })
     user: UserEntity;
 
+  @Column({
+    type: 'enum',
+    enum: OauthProvider,
+    nullable: false,
+  })
+    provider: OauthProvider;
+
+  @Column({
+    length: 255,
+    nullable: false,
+  })
+    provider_user_id: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
 }

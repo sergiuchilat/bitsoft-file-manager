@@ -19,6 +19,13 @@ export class UserEntity {
   })
     name: string;
 
+  @Column({
+    length: 255,
+    nullable: true,
+    unique: true,
+  })
+    email: string;
+
   @OneToOne(() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;
 

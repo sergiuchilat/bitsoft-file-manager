@@ -68,7 +68,10 @@ export class ClassicAuthService {
     const activationCode = v4 ();
 
     try {
-      const createdUserEntity = await this.usersService.create (classicAuthRegisterPayloadDto.name);
+      const createdUserEntity = await this.usersService.create (
+        classicAuthRegisterPayloadDto.name,
+        classicAuthRegisterPayloadDto.email
+      );
       registeredUser = await queryRunner.manager.save (ClassicAuthEntity, {
         ...classicAuthRegisterPayloadDto,
         password: await this.encodePassword (classicAuthRegisterPayloadDto.password),

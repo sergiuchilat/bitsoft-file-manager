@@ -50,25 +50,25 @@ export class ClassicAuthController {
       .send (await this.classicAuthService.activate (token));
   }
 
-  @ApiOperation ({summary: 'Resend activation email(needs to be implemented)'})
+  @ApiOperation ({summary: 'Resend activation email(---! needs to be implemented)'})
   @Post ('activate/resend')
   resendActivationEmail () {
     return 'resendActivationEmail';
   }
 
-  @ApiOperation ({summary: 'Request password reset(needs to be implemented)'})
+  @ApiOperation ({summary: 'Request password reset(---! needs to be implemented)'})
   @Post ('password/reset/request')
   resetPasswordStart () {
     return 'resetPassword';
   }
 
-  @ApiOperation ({summary: 'Confirm password reset(needs to be implemented)'})
+  @ApiOperation ({summary: 'Confirm password reset(---! needs to be implemented)'})
   @Patch ('password/reset/confirm')
   resetPasswordConfirm () {
     return 'resetPassword';
   }
 
-  @ApiOperation ({summary: 'Change password(needs to be implemented)'})
+  @ApiOperation ({summary: 'Change password(---! needs to be implemented)'})
   @Patch ('password/change')
   changePassword () {
     return 'changePassword';
@@ -80,7 +80,7 @@ export class ClassicAuthController {
     return 'logout';
   }
 
-  @ApiOperation ({summary: 'Update email(needs to be implemented)'})
+  @ApiOperation ({summary: 'Update email(---! needs to be implemented)'})
   @Patch ('email/update')
   updateEmail() {
     return 'updateEmail';

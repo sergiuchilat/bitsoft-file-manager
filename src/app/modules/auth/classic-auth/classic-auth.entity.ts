@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGenerate
 import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
 import { UserEntity } from '@/app/modules/users/user.entity';
 
-@Entity('auth_credentials_classic')
+@Entity('credentials_classic')
 export class ClassicAuthEntity {
   @PrimaryGeneratedColumn()
     id: number;
