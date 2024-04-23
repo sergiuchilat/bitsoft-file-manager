@@ -1,5 +1,5 @@
 import { Controller, Get, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { GoogleGuard } from '@/app/modules/auth/passport-js/guards/google.guard';
 import { VkGuard } from '@/app/modules/auth/passport-js/guards/vk.guard';
 import { FbGuard } from '@/app/modules/auth/passport-js/guards/fb.guard';
@@ -25,6 +25,7 @@ export class PassportJsController {
 
   @Get('google/complete')
   @UseGuards(GoogleGuard)
+  @ApiExcludeEndpoint()
   async handleGoogleComplete(@Request() req, @Response() res){
     return this.passportJsService.login(req, OauthProvider.GOOGLE);
     //res.redirect('http://localhost:3000');
@@ -38,6 +39,7 @@ export class PassportJsController {
 
   @Get('vk/complete')
   @UseGuards(VkGuard)
+  @ApiExcludeEndpoint()
   handleVkComplete(@Request() req) {
     return this.passportJsService.login(req, OauthProvider.VK);
   }
@@ -50,6 +52,7 @@ export class PassportJsController {
 
   @Get('fb/complete')
   @UseGuards(FbGuard)
+  @ApiExcludeEndpoint()
   async handleFbComplete(@Request() req){
     return await this.passportJsService.login(req, OauthProvider.FACEBOOK);
   }
