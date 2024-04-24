@@ -11,12 +11,12 @@ import ClassicAuthRegisterResponseDto from '@/app/modules/auth/classic-auth/dto/
 import AppConfig from '@/config/app-config';
 import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
 import { JwtService } from '@nestjs/jwt';
-import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
 import { MailerService } from '@/app/modules/auth/classic-auth/mailer.service';
 import { UsersService } from '@/app/modules/users/users.service';
 import { plainToInstance } from 'class-transformer';
 import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.dto';
+import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -43,7 +43,7 @@ export class ClassicAuthService {
       return {
         token: this.jwtService.sign (TokenGeneratorService.generatePayload (
           existingUser.user.uuid,
-          AuthMethodsEnum.CLASSIC,
+          OauthProvider.CLASSIC,
           {
             email: existingUser.email,
             name: existingUser.user.fullName,

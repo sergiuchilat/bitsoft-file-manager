@@ -39,6 +39,7 @@ export class UsersService {
     email: string,
     provider: OauthProvider = null
   ): Promise<UserEntity> {
+
     if(provider === OauthProvider.GOOGLE) {
       return (await this.findExistingUserForGoogleProvider(email)).user;
     }
@@ -48,6 +49,14 @@ export class UsersService {
 
   private async findExistingUserForGoogleProvider(email: string){
     return null;// await this.classicAuthService.findUserByEmail(email);
+  }
+
+  async findUserByEmail (email: string){
+    return await this.usersRepository.findOne({
+      where: {
+        email
+      }
+    });
   }
 
   async delete (id: number): Promise<void> {

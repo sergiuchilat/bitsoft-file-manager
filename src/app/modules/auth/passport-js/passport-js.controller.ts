@@ -8,7 +8,7 @@ import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enu
 
 @Controller({
   version: '1',
-  path: '/auth'
+  path: '/oauth'
 })
 @ApiTags('Auth: PassportJs')
 export class PassportJsController {
@@ -17,7 +17,7 @@ export class PassportJsController {
     private readonly passportJsService: PassportJsService
   ) {}
 
-  @Get('google/login')
+  @Get('google')
   @UseGuards(GoogleGuard)
   handleGoogleLogin() {
     return 'Google login';
@@ -31,7 +31,7 @@ export class PassportJsController {
     res.redirect(`${process.env.REDIRECT_AFTER_LOGIN}?code=${response.token_code}`);
   }
 
-  @Get('vk/login')
+  @Get('vk')
   @UseGuards(VkGuard)
   handleVkLogin() {
     return 'VK login';
@@ -45,7 +45,7 @@ export class PassportJsController {
     res.redirect(`${process.env.REDIRECT_AFTER_LOGIN}?code=${response.token_code}`);
   }
 
-  @Get('fb/login')
+  @Get('fb')
   @UseGuards(FbGuard)
   handleFbLogin() {
     return 'FB login';

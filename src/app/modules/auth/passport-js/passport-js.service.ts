@@ -6,7 +6,6 @@ import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enu
 import { UsersService } from '@/app/modules/users/users.service';
 import { v4 } from 'uuid';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
-import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
 import AppConfig from '@/config/app-config';
 import { JwtService } from '@nestjs/jwt';
 
@@ -40,7 +39,13 @@ export class PassportJsService {
     }
 
 
-    const createdUser = await this.usersService.create (req.user.email, req.user.firstName, req.user.lastName);
+    //const userOwnedEmail = await this.usersService.findUserByEmail (req.user.email);
+    // let userEmail = null;
+    // if(!userOwnedEmail) {
+    //   userEmail = req.user.email || null;
+    // }
+    const userEmail = req.user.email || null;
+    const createdUser = await this.usersService.create (userEmail, req.user.firstName, req.user.lastName);
 
     console.log ('createdUser', createdUser);
 
@@ -65,21 +70,21 @@ export class PassportJsService {
   }
 
   async getTokenByCode (code: string) {
-    const existingUser = await this.oauthCredentialRepository.findOne ({
+    const existingCredentials = await this.oauthCredentialRepository.findOne ({
       where: { token_code: code },
       relations: ['user']
     });
-    if (!existingUser) {
+    if (!existingCredentials) {
       throw new HttpException('Not found', 404);
     }
 
     return {
       token: this.jwtService.sign (TokenGeneratorService.generatePayload (
-        existingUser.user.uuid,
-        AuthMethodsEnum.CLASSIC,
+        existingCredentials.user.uuid,
+        existingCredentials.provider,
         {
-          email: existingUser.email,
-          name: existingUser.user.fullName,
+          email: existingCredentials.email,
+          name: existingCredentials.user.fullName,
         }
       ), {
         secret: AppConfig.jwt.secret,

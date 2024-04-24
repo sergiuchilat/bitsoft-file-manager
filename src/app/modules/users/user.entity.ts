@@ -28,7 +28,6 @@ export class UserEntity {
   @Column ({
     length: 255,
     nullable: true,
-    unique: true,
   })
     email: string;
 

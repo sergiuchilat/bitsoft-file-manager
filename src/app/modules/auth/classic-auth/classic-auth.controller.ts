@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { Body, Controller, Delete, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
@@ -8,7 +8,7 @@ import ClassicAuthLoginPayloadDto from './dto/classic-auth-login.payload.dto';
 @ApiTags ('Auth: Classic')
 @Controller ({
   version: '1',
-  path: 'auth/classic',
+  path: 'auth',
 
 })
 export class ClassicAuthController {
