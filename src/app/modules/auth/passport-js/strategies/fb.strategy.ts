@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
+import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
 
 @Injectable()
 export class FbStrategy extends PassportStrategy(Strategy, 'facebook'){
@@ -10,7 +11,7 @@ export class FbStrategy extends PassportStrategy(Strategy, 'facebook'){
       clientSecret: process.env.FB_AUTH_APP_SECRET,
       callbackURL: process.env.FB_AUTH_REDIRECT_URL,
       scope: 'email',
-      profileFields: ['name', 'emails'],
+      profileFields: ['name', 'emails', 'photos'],
     });
   }
 
@@ -18,20 +19,18 @@ export class FbStrategy extends PassportStrategy(Strategy, 'facebook'){
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: Function
+    done: CallableFunction
   ) {
-    const { name, emails } = profile;
+    console.log('FB profile', profile);
     const user = {
-      email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
+      id: profile.id,
+      email: profile?.emails[0]?.value || null,
+      firstName: profile.name.givenName,
+      lastName: profile.name.familyName,
+      photo: profile?.photos[0]?.value || null,
+      provider: OauthProvider.FACEBOOK,
     };
 
-    const payload = {
-      user,
-      accessToken,
-    };
-
-    done(null, payload);
+    done(null, user);
   }
 }

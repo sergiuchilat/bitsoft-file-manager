@@ -27,8 +27,8 @@ export class PassportJsController {
   @UseGuards(GoogleGuard)
   @ApiExcludeEndpoint()
   async handleGoogleComplete(@Request() req, @Response() res){
-    return this.passportJsService.login(req, OauthProvider.GOOGLE);
-    //res.redirect('http://localhost:3000');
+    const response = await this.passportJsService.login(req, OauthProvider.GOOGLE);
+    res.redirect(`${process.env.REDIRECT_AFTER_LOGIN}?code=${response.token_code}`);
   }
 
   @Get('vk/login')
@@ -40,8 +40,9 @@ export class PassportJsController {
   @Get('vk/complete')
   @UseGuards(VkGuard)
   @ApiExcludeEndpoint()
-  handleVkComplete(@Request() req) {
-    return this.passportJsService.login(req, OauthProvider.VK);
+  async handleVkComplete(@Request() req, @Response() res) {
+    const response = await this.passportJsService.login(req, OauthProvider.VK);
+    res.redirect(`${process.env.REDIRECT_AFTER_LOGIN}?code=${response.token_code}`);
   }
 
   @Get('fb/login')
@@ -53,8 +54,14 @@ export class PassportJsController {
   @Get('fb/complete')
   @UseGuards(FbGuard)
   @ApiExcludeEndpoint()
-  async handleFbComplete(@Request() req){
-    return await this.passportJsService.login(req, OauthProvider.FACEBOOK);
+  async handleFbComplete(@Request() req, @Response() res){
+    const response = await this.passportJsService.login(req, OauthProvider.FACEBOOK);
+    res.redirect(`${process.env.REDIRECT_AFTER_LOGIN}?code=${response.token_code}`);
+  }
+
+  @Get('token/:code')
+  async getToken() {
+    return 'Tokens';
   }
 
 }
