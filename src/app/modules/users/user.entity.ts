@@ -1,32 +1,42 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 
-@Entity('users')
+@Entity ('users')
 export class UserEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn ()
     id: number;
 
-  @Column({
+  @Column ({
     length: 36,
     nullable: false,
     unique: true,
   })
     uuid: string;
 
-  @Column({
+  @Column ({
     length: 255,
     nullable: true,
   })
-    name: string;
+    firstName: string;
 
-  @Column({
+  @Column ({
+    length: 255,
+    nullable: true,
+  })
+    lastName: string;
+
+  @Column ({
     length: 255,
     nullable: true,
     unique: true,
   })
     email: string;
 
-  @OneToOne(() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
+  @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;
 
+
+  public get fullName (): string {
+    return `${this.firstName} ${this.lastName}`;
+  }
 }

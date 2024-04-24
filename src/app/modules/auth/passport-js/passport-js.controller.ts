@@ -1,4 +1,4 @@
-import { Controller, Get, Request, Response, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Request, Response, UseGuards } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { GoogleGuard } from '@/app/modules/auth/passport-js/guards/google.guard';
 import { VkGuard } from '@/app/modules/auth/passport-js/guards/vk.guard';
@@ -60,8 +60,14 @@ export class PassportJsController {
   }
 
   @Get('token/:code')
-  async getToken() {
-    return 'Tokens';
+  async getToken(
+    @Param('code') code: string,
+    @Response() res
+  ){
+    res
+      .status(HttpStatus.OK)
+      .send(await this.passportJsService.getTokenByCode(code));
   }
+
 
 }

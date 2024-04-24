@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OauthCredentialEntity } from '@/app/modules/auth/passport-js/entities/oauth-credential.entity';
 import { UsersService } from '@/app/modules/users/users.service';
 import { UserEntity } from '@/app/modules/users/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserEntity } from '@/app/modules/users/user.entity';
     GoogleStrategy,
     VkStrategy,
     FbStrategy,
+    JwtService
   ]
 })
 export class PassportJsModule {}

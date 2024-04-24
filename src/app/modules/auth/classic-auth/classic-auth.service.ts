@@ -46,7 +46,7 @@ export class ClassicAuthService {
           AuthMethodsEnum.CLASSIC,
           {
             email: existingUser.email,
-            name: existingUser.user.name,
+            name: existingUser.user.fullName,
           }
         ), {
           secret: AppConfig.jwt.secret,
@@ -68,10 +68,7 @@ export class ClassicAuthService {
     const activationCode = v4 ();
 
     try {
-      const createdUserEntity = await this.usersService.create (
-        classicAuthRegisterPayloadDto.name,
-        classicAuthRegisterPayloadDto.email
-      );
+      const createdUserEntity = await this.usersService.create (classicAuthRegisterPayloadDto.name, classicAuthRegisterPayloadDto.email);
       registeredUser = await queryRunner.manager.save (ClassicAuthEntity, {
         ...classicAuthRegisterPayloadDto,
         password: await this.encodePassword (classicAuthRegisterPayloadDto.password),
@@ -134,14 +131,24 @@ export class ClassicAuthService {
     };
   }
 
-  async startResetPassword (email: string) {
-    const user = await this.classicAuthRepository.findOne ({
+  async findUserByEmail (email: string) {
+    return await this.classicAuthRepository.findOne ({
       where: {
         email: email
-      }
+      },
+      relations: ['user']
+    });
+  }
+
+  async startResetPassword (email: string) {
+    const credentials = await this.classicAuthRepository.findOne ({
+      where: {
+        email: email
+      },
+      relations: ['user']
     });
 
-    if (!user) {
+    if (!credentials) {
       throw new HttpException ('User not found', HttpStatus.NOT_FOUND);
     }
 
@@ -155,7 +162,7 @@ export class ClassicAuthService {
 
     await this.mailerService.sendResetPasswordEmail (
       email,
-      user.user.name,
+      `${credentials.user.fullName}`,
       this.generateResetPasswordLink (resetCode)
     );
 
