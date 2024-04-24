@@ -25,7 +25,7 @@ export class VkStrategy extends PassportStrategy (Strategy, 'vk') {
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
           photo: profile.photos[0].value,
-          provider: OauthProvider.VK
+          provider: OauthProvider.VK,
         };
 
         done (null, user);

@@ -18,6 +18,12 @@ export class OauthCredentialEntity {
     email: string;
 
   @Column({
+    length: 512,
+    nullable: true,
+  })
+    photo: string;
+
+  @Column({
     nullable: false,
   })
     user_id: number;

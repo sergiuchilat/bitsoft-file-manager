@@ -4,7 +4,8 @@ export class TokenGeneratorService {
       props: {
         authProvider,
         email: user.email,
-        name: user.name
+        name: user.name,
+        photo: user.photo
       },
       sub
     };

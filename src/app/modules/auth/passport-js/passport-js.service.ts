@@ -38,7 +38,6 @@ export class PassportJsService {
       return existingCredentials;
     }
 
-
     //const userOwnedEmail = await this.usersService.findUserByEmail (req.user.email);
     // let userEmail = null;
     // if(!userOwnedEmail) {
@@ -49,20 +48,14 @@ export class PassportJsService {
 
     console.log ('createdUser', createdUser);
 
-    // const credentials = new OauthCredentialEntity ();
     const tokenCode = v4 ();
-    // credentials.user_id = createdUser.id;
-    // credentials.email = req.user.email;
-    // credentials.provider = req.user.provider;
-    // credentials.provider_user_id = req.user.id;
-    // credentials.token_code = tokenCode;
-
     await this.oauthCredentialRepository.save ({
       user_id: createdUser.id,
       email: req.user.email,
       provider: provider,
       provider_user_id: req.user.id,
-      token_code: tokenCode
+      token_code: tokenCode,
+      photo: req.user.photo
     });
     return {
       token_code: tokenCode
@@ -74,6 +67,7 @@ export class PassportJsService {
       where: { token_code: code },
       relations: ['user']
     });
+
     if (!existingCredentials) {
       throw new HttpException('Not found', 404);
     }
@@ -85,6 +79,7 @@ export class PassportJsService {
         {
           email: existingCredentials.email,
           name: existingCredentials.user.fullName,
+          photo: existingCredentials.photo
         }
       ), {
         secret: AppConfig.jwt.secret,
