@@ -72,6 +72,11 @@ export class PassportJsService {
       throw new HttpException('Not found', 404);
     }
 
+    await this.oauthCredentialRepository.update (existingCredentials.id, {
+      token_code: null
+    });
+
+
     return {
       token: this.jwtService.sign (TokenGeneratorService.generatePayload (
         existingCredentials.user.uuid,
