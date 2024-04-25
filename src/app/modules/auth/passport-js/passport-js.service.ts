@@ -2,12 +2,12 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { OauthCredentialEntity } from '@/app/modules/auth/passport-js/entities/oauth-credential.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
 import { UsersService } from '@/app/modules/users/users.service';
 import { v4 } from 'uuid';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
 import AppConfig from '@/config/app-config';
 import { JwtService } from '@nestjs/jwt';
+import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 
 @Injectable ()
 export class PassportJsService {

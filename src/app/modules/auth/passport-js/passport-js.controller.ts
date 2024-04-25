@@ -4,7 +4,7 @@ import { GoogleGuard } from '@/app/modules/auth/passport-js/guards/google.guard'
 import { VkGuard } from '@/app/modules/auth/passport-js/guards/vk.guard';
 import { FbGuard } from '@/app/modules/auth/passport-js/guards/fb.guard';
 import { PassportJsService } from '@/app/modules/auth/passport-js/passport-js.service';
-import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
+import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 
 @Controller({
   version: '1',

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { UserEntity } from '@/app/modules/users/user.entity';
-import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
+import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 
 @Entity({
   name: 'credentials_oauth',

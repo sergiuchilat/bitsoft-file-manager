@@ -9,14 +9,14 @@ import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/clas
 import ClassicAuthRegisterPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.payload.dto';
 import ClassicAuthRegisterResponseDto from '@/app/modules/auth/classic-auth/dto/classic-auth-register.response.dto';
 import AppConfig from '@/config/app-config';
-import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
 import { JwtService } from '@nestjs/jwt';
 import { TokenGeneratorService } from '@/app/modules/common/token-generator.service';
 import { MailerService } from '@/app/modules/auth/classic-auth/mailer.service';
 import { UsersService } from '@/app/modules/users/users.service';
 import { plainToInstance } from 'class-transformer';
 import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.dto';
-import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
+import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
+import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -116,9 +116,9 @@ export class ClassicAuthService {
 
     const result = await this.classicAuthRepository.update ({
       activation_code: token,
-      status: AuthMethodStatusEnum.NEW
+      status: AuthMethodStatus.NEW
     }, {
-      status: AuthMethodStatusEnum.ACTIVE
+      status: AuthMethodStatus.ACTIVE
     });
 
     if (!result?.affected) {
@@ -127,7 +127,7 @@ export class ClassicAuthService {
 
     return {
       token: token,
-      status: AuthMethodStatusEnum.ACTIVE
+      status: AuthMethodStatus.ACTIVE
     };
   }
 
@@ -168,7 +168,7 @@ export class ClassicAuthService {
 
     return {
       email: email,
-      status: AuthMethodStatusEnum.NEW
+      status: AuthMethodStatus.NEW
     };
   }
 

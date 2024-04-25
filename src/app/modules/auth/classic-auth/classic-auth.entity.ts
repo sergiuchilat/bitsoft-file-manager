@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
+
 import { UserEntity } from '@/app/modules/users/user.entity';
+import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
 
 @Entity('credentials_classic')
 export class ClassicAuthEntity {
@@ -22,9 +23,9 @@ export class ClassicAuthEntity {
 
   @Column({
     nullable: false,
-    default: AuthMethodStatusEnum.NEW
+    default: AuthMethodStatus.NEW
   })
-    status: AuthMethodStatusEnum;
+    status: AuthMethodStatus;
 
   @Column({
     nullable: true,

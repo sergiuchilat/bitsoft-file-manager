@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { v4 } from 'uuid';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import { UsersRepository } from '@/app/modules/users/users.repository';
-import { OauthProvider } from '@/app/modules/auth/passport-js/enums/provider.enum';
+import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 
 @Injectable ()
 export class UsersService {
