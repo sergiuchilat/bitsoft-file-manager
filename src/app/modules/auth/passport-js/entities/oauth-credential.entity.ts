@@ -18,7 +18,7 @@ export class OauthCredentialEntity {
     email: string;
 
   @Column({
-    length: 512,
+    length: 2048,
     nullable: true,
   })
     photo: string;
