@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
-import { DataSource } from 'typeorm';
+import { DataSource, IsNull, Not } from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { ClassicAuthRepository } from '@/app/modules/auth/classic-auth/classic-auth.repository';
 import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.payload.dto';
@@ -33,7 +33,9 @@ export class ClassicAuthService {
   async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto): Promise<AuthLoginResponseDto> {
     const existingUser = await this.classicAuthRepository.findOne ({
       where: {
-        email: classicAuthLoginPayloadDto.email
+        email: classicAuthLoginPayloadDto.email,
+        status: AuthMethodStatus.ACTIVE,
+        user_id: Not (IsNull ())
       },
       relations: ['user']
     });
@@ -46,7 +48,7 @@ export class ClassicAuthService {
           OauthProvider.CLASSIC,
           {
             email: existingUser.email,
-            name: existingUser.user.fullName,
+            name: existingUser.user.name,
           }
         ), {
           secret: AppConfig.jwt.secret,
@@ -60,42 +62,30 @@ export class ClassicAuthService {
   }
 
   async register (classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto): Promise<ClassicAuthRegisterResponseDto> {
-    const queryRunner = this.dataSource.createQueryRunner ();
-    await queryRunner.connect ();
-    await queryRunner.startTransaction ();
-    let registeredUser = null;
-    let success = false;
     const activationCode = v4 ();
 
     try {
-      const createdUserEntity = await this.usersService.create (classicAuthRegisterPayloadDto.name, classicAuthRegisterPayloadDto.email);
-      registeredUser = await queryRunner.manager.save (ClassicAuthEntity, {
+      const registeredUser = await this.classicAuthRepository.save({
         ...classicAuthRegisterPayloadDto,
-        password: await this.encodePassword (classicAuthRegisterPayloadDto.password),
         activation_code: activationCode,
-        user: createdUserEntity,
+        status: AuthMethodStatus.NEW,
+        name: classicAuthRegisterPayloadDto.name,
       });
-      await queryRunner.commitTransaction ();
-      success = true;
+
+      await this.mailerService.sendActivationEmail (
+        classicAuthRegisterPayloadDto.email,
+        classicAuthRegisterPayloadDto.name,
+        this.generateActivationLink(activationCode)
+      );
+
+      return plainToInstance (
+        ClassicAuthRegisterResponseDto,
+        registeredUser
+      );
+
     } catch (e) {
-      await queryRunner.rollbackTransaction ();
       throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
-    } finally {
-      await queryRunner.release ();
-
-      if (success) {
-        await this.mailerService.sendActivationEmail (
-          classicAuthRegisterPayloadDto.email,
-          classicAuthRegisterPayloadDto.name,
-          this.generateActivationLink(activationCode)
-        );
-      }
     }
-
-    return plainToInstance (
-      ClassicAuthRegisterResponseDto,
-      registeredUser
-    );
   }
 
   async activate (token: string) {
@@ -114,11 +104,41 @@ export class ClassicAuthService {
     //
     // console.log('test', test);
 
+    const existingClassicCredentials = await this.classicAuthRepository.findOne ({
+      where: {
+        activation_code: token,
+        status: AuthMethodStatus.NEW
+      }
+    });
+
+    if (!existingClassicCredentials) {
+      throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
+    }
+
+    // check if Google Credentials already exist for this email
+    let existingUser = await this.usersService.findExistingUser (
+      existingClassicCredentials.email,
+      OauthProvider.GOOGLE
+    );
+
+    if (!existingUser) {
+      existingUser = await this.usersService.create (
+        existingClassicCredentials.email,
+        existingClassicCredentials.name
+      );
+    }
+
+    if (!existingUser) {
+      throw new HttpException ('Error creating user', HttpStatus.CONFLICT);
+    }
+
     const result = await this.classicAuthRepository.update ({
       activation_code: token,
       status: AuthMethodStatus.NEW
     }, {
-      status: AuthMethodStatus.ACTIVE
+      status: AuthMethodStatus.ACTIVE,
+      user_id: existingUser.id,
+      activation_code: null
     });
 
     if (!result?.affected) {
@@ -129,15 +149,6 @@ export class ClassicAuthService {
       token: token,
       status: AuthMethodStatus.ACTIVE
     };
-  }
-
-  async findUserByEmail (email: string) {
-    return await this.classicAuthRepository.findOne ({
-      where: {
-        email: email
-      },
-      relations: ['user']
-    });
   }
 
   async startResetPassword (email: string) {
@@ -162,7 +173,7 @@ export class ClassicAuthService {
 
     await this.mailerService.sendResetPasswordEmail (
       email,
-      `${credentials.user.fullName}`,
+      `${credentials.user.name}`,
       this.generateResetPasswordLink (resetCode)
     );
 
@@ -170,10 +181,6 @@ export class ClassicAuthService {
       email: email,
       status: AuthMethodStatus.NEW
     };
-  }
-
-  private async encodePassword (password: string) {
-    return await hash (password, 10);
   }
 
   private generateActivationLink (token: string) {

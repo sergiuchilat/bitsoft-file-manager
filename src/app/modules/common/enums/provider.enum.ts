@@ -6,4 +6,5 @@ export enum OauthProvider{
   GITHUB = 'GITHUB',
   LINKEDIN = 'LINKEDIN',
   VK = 'VK',
+  APPLE = 'APPLE',
 }

@@ -22,6 +22,12 @@ export class ClassicAuthEntity {
     password: string;
 
   @Column({
+    length: 255,
+    nullable: true,
+  })
+    name: string;
+
+  @Column({
     nullable: false,
     default: AuthMethodStatus.NEW
   })
@@ -40,7 +46,7 @@ export class ClassicAuthEntity {
     reset_password_code: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
   })
     user_id: number;
 

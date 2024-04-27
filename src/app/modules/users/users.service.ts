@@ -9,14 +9,13 @@ import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 export class UsersService {
   constructor (
     @InjectRepository(UserEntity)
-    private readonly usersRepository: UsersRepository
+    private readonly usersRepository: UsersRepository,
   ) {
   }
 
   async create (
     email = null,
-    firstName = null,
-    lastName = null,
+    name = null,
     provider: OauthProvider = null
   ): Promise<UserEntity> {
 
@@ -30,18 +29,25 @@ export class UsersService {
     return await this.usersRepository.save ({
       uuid: v4 (),
       email: email || null,
-      firstName: firstName || null,
-      lastName: lastName || null
+      name: name || null
     });
   }
 
-  private async findExistingUser (
+  async findExistingUser (
     email: string,
     provider: OauthProvider = null
   ): Promise<UserEntity> {
 
     if(provider === OauthProvider.GOOGLE) {
-      return (await this.findExistingUserForGoogleProvider(email)).user;
+      console.log('findExistingUserForGoogleProvider', email);
+      return this.usersRepository.findOne({
+        where: {
+          oAuth: {
+            email
+          }
+        },
+        relations: ['oAuth']
+      });
     }
 
     return null;
@@ -49,6 +55,10 @@ export class UsersService {
 
   private async findExistingUserForGoogleProvider(email: string){
     return null;// await this.classicAuthService.findUserByEmail(email);
+  }
+
+  private async findExistingUserForClassicProvider(email: string){
+    return null;
   }
 
   async findUserByEmail (email: string){

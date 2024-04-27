@@ -6,7 +6,7 @@ services:
     image: postgres:16-alpine
     restart: always
     hostname: postgres
-    container_name: notify-db
+    container_name: auth-db
     profiles:
       - all
       - db
@@ -17,7 +17,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-      TZ: UTC+3
+      TZ: "Europe/Bucharest"
     networks:
       - auth
     ports:

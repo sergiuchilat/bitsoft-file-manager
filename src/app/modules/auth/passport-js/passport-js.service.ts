@@ -26,6 +26,13 @@ export class PassportJsService {
       return 'No user from passport-js';
     }
 
+    const tokenCode = v4 ();
+
+    // if existingCredentials then
+    //   update token_code
+    // else
+    //   insert
+
     const existingCredentials = await this.oauthCredentialRepository.findOne ({
       where: {
         provider: provider,
@@ -35,7 +42,10 @@ export class PassportJsService {
     });
 
     if (existingCredentials) {
-      return existingCredentials;
+      console.log ('ExistingCredentials', existingCredentials);
+      await this.oauthCredentialRepository.update (existingCredentials.id, {
+        token_code: tokenCode
+      });
     }
 
     //const userOwnedEmail = await this.usersService.findUserByEmail (req.user.email);
@@ -43,13 +53,18 @@ export class PassportJsService {
     // if(!userOwnedEmail) {
     //   userEmail = req.user.email || null;
     // }
+
+    // const existingUser = await this.findExistingUser (provider);
+
+    const existingUser = this.usersService.findExistingUser (req.user.email, provider);
+
     const userEmail = req.user.email || null;
     const createdUser = await this.usersService.create (userEmail, req.user.firstName, req.user.lastName);
 
     console.log ('createdUser', createdUser);
 
-    const tokenCode = v4 ();
-    await this.oauthCredentialRepository.save ({
+
+    const createdOauthCredentials = await this.oauthCredentialRepository.save ({
       user_id: createdUser.id,
       email: req.user.email,
       provider: provider,
@@ -57,6 +72,9 @@ export class PassportJsService {
       token_code: tokenCode,
       photo: req.user.photo
     });
+
+    console.log ('createdOauthCredentials', createdOauthCredentials);
+
     return {
       token_code: tokenCode
     };
@@ -69,13 +87,12 @@ export class PassportJsService {
     });
 
     if (!existingCredentials) {
-      throw new HttpException('Not found', 404);
+      throw new HttpException ('Not found', 404);
     }
 
     await this.oauthCredentialRepository.update (existingCredentials.id, {
       token_code: null
     });
-
 
     return {
       token: this.jwtService.sign (TokenGeneratorService.generatePayload (
@@ -83,7 +100,7 @@ export class PassportJsService {
         existingCredentials.provider,
         {
           email: existingCredentials.email,
-          name: existingCredentials.user.fullName,
+          name: existingCredentials.user.name,
           photo: existingCredentials.photo
         }
       ), {
@@ -92,5 +109,33 @@ export class PassportJsService {
       }),
       refresh_token: null
     };
+  }
+
+  private async findExistingUser (currentProvider: OauthProvider) {
+    let existingUser = null;
+
+    if (currentProvider === OauthProvider.CLASSIC) {
+      existingUser = await this.findUserWithGoogleAuth ();
+      if (existingUser) {
+        return existingUser;
+      }
+    }
+
+    if (currentProvider === OauthProvider.GOOGLE) {
+      existingUser = await this.findUserWithClassicAuth ();
+      if (existingUser) {
+        return existingUser;
+      }
+    }
+
+    return existingUser;
+  }
+
+  private async findUserWithClassicAuth () {
+    return null;
+  }
+
+  private async findUserWithGoogleAuth () {
+    return null;
   }
 }

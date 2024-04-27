@@ -1,5 +1,6 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
+import { OauthCredentialEntity } from '@/app/modules/auth/passport-js/entities/oauth-credential.entity';
 
 @Entity ('users')
 export class UserEntity {
@@ -17,13 +18,7 @@ export class UserEntity {
     length: 255,
     nullable: true,
   })
-    firstName: string;
-
-  @Column ({
-    length: 255,
-    nullable: true,
-  })
-    lastName: string;
+    name: string;
 
   @Column ({
     length: 255,
@@ -34,8 +29,6 @@ export class UserEntity {
   @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;
 
-
-  public get fullName (): string {
-    return `${this.firstName} ${this.lastName}`;
-  }
+  @OneToMany (() => OauthCredentialEntity, (oAuth) => oAuth.user)
+    oAuth: OauthCredentialEntity;
 }

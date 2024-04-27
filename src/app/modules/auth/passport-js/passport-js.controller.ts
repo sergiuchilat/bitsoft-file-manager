@@ -68,6 +68,4 @@ export class PassportJsController {
       .status(HttpStatus.OK)
       .send(await this.passportJsService.getTokenByCode(code));
   }
-
-
 }
