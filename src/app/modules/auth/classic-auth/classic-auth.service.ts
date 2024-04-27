@@ -70,6 +70,7 @@ export class ClassicAuthService {
         activation_code: activationCode,
         status: AuthMethodStatus.NEW,
         name: classicAuthRegisterPayloadDto.name,
+        password: await hash (classicAuthRegisterPayloadDto.password, 10)
       });
 
       await this.mailerService.sendActivationEmail (

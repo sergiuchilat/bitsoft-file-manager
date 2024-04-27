@@ -50,23 +50,19 @@ export class UsersService {
       });
     }
 
+    if(provider === OauthProvider.CLASSIC) {
+      console.log('findExistingUserForClassicProvider', email);
+      return this.usersRepository.findOne({
+        where: {
+          classicAuth: {
+            email
+          }
+        },
+        relations: ['classicAuth']
+      });
+    }
+
     return null;
-  }
-
-  private async findExistingUserForGoogleProvider(email: string){
-    return null;// await this.classicAuthService.findUserByEmail(email);
-  }
-
-  private async findExistingUserForClassicProvider(email: string){
-    return null;
-  }
-
-  async findUserByEmail (email: string){
-    return await this.usersRepository.findOne({
-      where: {
-        email
-      }
-    });
   }
 
   async delete (id: number): Promise<void> {
