@@ -75,8 +75,8 @@ export class ClassicAuthService {
 
       await this.mailerService.sendActivationEmail (
         classicAuthRegisterPayloadDto.email,
-        classicAuthRegisterPayloadDto.name,
-        this.generateActivationLink(activationCode)
+        this.generateActivationLink(activationCode),
+        classicAuthRegisterPayloadDto.name
       );
 
       return plainToInstance (
@@ -119,7 +119,7 @@ export class ClassicAuthService {
     // check if Google Credentials already exist for this email
     let existingUser = await this.usersService.findExistingUser (
       existingClassicCredentials.email,
-      OauthProvider.GOOGLE
+      OauthProvider.CLASSIC
     );
 
     if (!existingUser) {
@@ -139,7 +139,8 @@ export class ClassicAuthService {
     }, {
       status: AuthMethodStatus.ACTIVE,
       user_id: existingUser.id,
-      activation_code: null
+      activation_code: null,
+      name: existingClassicCredentials.name
     });
 
     if (!result?.affected) {

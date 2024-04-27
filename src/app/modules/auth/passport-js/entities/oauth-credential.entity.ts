@@ -52,7 +52,19 @@ export class OauthCredentialEntity {
     length: 36,
     nullable: true,
   })
-    token_code: string;
+    token_activation_code: string;
+
+  @Column({
+    length: 2048,
+    nullable: true,
+  })
+    token: string;
+
+  @Column({
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+    token_valid_until: Date;
 
   createdAt: Date;
   updatedAt: Date;

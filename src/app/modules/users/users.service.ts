@@ -8,7 +8,7 @@ import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 @Injectable ()
 export class UsersService {
   constructor (
-    @InjectRepository(UserEntity)
+    @InjectRepository (UserEntity)
     private readonly usersRepository: UsersRepository,
   ) {
   }
@@ -19,10 +19,10 @@ export class UsersService {
     provider: OauthProvider = null
   ): Promise<UserEntity> {
 
-    const existingUser = await this.findExistingUser(email, provider);
-    console.log('existingUser', existingUser);
+    const existingUser = await this.findExistingUser (email, provider);
+    console.log ('existingUser', existingUser);
 
-    if(existingUser) {
+    if (existingUser) {
       return existingUser;
     }
 
@@ -35,12 +35,11 @@ export class UsersService {
 
   async findExistingUser (
     email: string,
-    provider: OauthProvider = null
+    requestProvider: OauthProvider = null
   ): Promise<UserEntity> {
 
-    if(provider === OauthProvider.GOOGLE) {
-      console.log('findExistingUserForGoogleProvider', email);
-      return this.usersRepository.findOne({
+    if (requestProvider === OauthProvider.CLASSIC) {
+      return this.usersRepository.findOne ({
         where: {
           oAuth: {
             email
@@ -50,9 +49,8 @@ export class UsersService {
       });
     }
 
-    if(provider === OauthProvider.CLASSIC) {
-      console.log('findExistingUserForClassicProvider', email);
-      return this.usersRepository.findOne({
+    if (requestProvider === OauthProvider.GOOGLE) {
+      return this.usersRepository.findOne ({
         where: {
           classicAuth: {
             email
@@ -66,6 +64,6 @@ export class UsersService {
   }
 
   async delete (id: number): Promise<void> {
-    await this.usersRepository.delete ({id});
+    await this.usersRepository.delete ({ id });
   }
 }

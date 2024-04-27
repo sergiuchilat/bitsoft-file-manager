@@ -5,14 +5,10 @@ import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class MailerService {
-  constructor(
-    private readonly httpService: HttpService
-  ) {}
-
   async sendActivationEmail (
     email: string,
-    name = '',
-    activationLink: string
+    activationLink: string,
+    name = ''
   ) {
     const notifyServiceUrl = process.env.NOTIFY_SERVICE_URL;
     const notifyServiceApiKey = process.env.NOTIFY_SERVICE_KEY;
@@ -29,7 +25,7 @@ export class MailerService {
 
     try {
       const notifySendUrl = `${ notifyServiceUrl }`;
-      const response = await this.httpService.axiosRef.post (notifySendUrl, {
+      await this.httpService.axiosRef.post (notifySendUrl, {
         'subject': parse (emailBody).querySelector ('title').text,
         'body': parse (emailBody).querySelector ('body').innerHTML,
         'language': 'en',
@@ -53,6 +49,10 @@ export class MailerService {
 
     return emailBody;
   }
+
+  constructor(
+    private readonly httpService: HttpService
+  ) {}
 
   async sendResetPasswordEmail (
     email: string,
