@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { Body, Controller, Delete, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
@@ -55,6 +55,9 @@ export class ClassicAuthController {
   resendActivationEmail () {
     // Resend activation email.
     // Payload should contain email address
+    // {
+    //   "email": "email@domain.com"
+    // }
     // after sending email, return success message
     // if email not found, return also success message to prevent email enumeration attack.
     // The message "If the email is registered, an activation email will be sent" should be returned
@@ -88,6 +91,7 @@ export class ClassicAuthController {
     return 'resetPassword';
   }
 
+  @ApiOperation ({summary: 'Verify password reset token(---! needs to be implemented)'})
   @Get ('password/reset/:token')
   verifyResetPasswordToken () {
     // Verify password reset token.

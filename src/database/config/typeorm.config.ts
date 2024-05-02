@@ -16,6 +16,7 @@ const config = {
   autoLoadEntities: true,
   synchronize: true,
   logging: true,
+  //logger: 'file',
   maxQueryExecutionTime: 1000,
   // logger: 'file',
   extra: {

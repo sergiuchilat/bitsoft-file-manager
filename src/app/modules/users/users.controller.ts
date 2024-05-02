@@ -33,6 +33,7 @@ export class UsersController {
   @Patch ('block/:uuid')
   async block () {
     // Block a user by uuid. Just system admin can block a user
+    // when user is blocked he can't use any of the auth methods
     return 'BLock a user';
   }
 
@@ -40,6 +41,7 @@ export class UsersController {
   @Patch ('unblock/:uuid')
   async unblock () {
     // Unblock a user by uuid. Just system admin can unblock a user
+    // when user is unblocked he can use any of the auth methods
     return 'Unblock a user';
   }
 
@@ -47,6 +49,7 @@ export class UsersController {
   @Delete ('/:uuid')
   async delete (id: number): Promise<any> {
     // Delete a user by uuid. Just system admin can delete a user
+    // also delete all auth methods attached to the user
     return await this.usersService.delete (id);
   }
 
