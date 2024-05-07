@@ -39,6 +39,7 @@ export class ClassicAuthService {
       },
       relations: ['user']
     });
+
     const passwordMatch = await compare (classicAuthLoginPayloadDto.password, existingUser?.password || '');
 
     if (existingUser && passwordMatch) {

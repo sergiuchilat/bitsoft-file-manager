@@ -1,6 +1,8 @@
-import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Res} from '@nestjs/common';
+import {ApiBearerAuth, ApiOperation, ApiTags} from '@nestjs/swagger';
 import { UsersService } from '@/app/modules/users/users.service';
+import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
+import { Response } from 'express';
 
 @ApiTags ('Users')
 @Controller ({
@@ -14,43 +16,47 @@ export class UsersController {
   ) {
   }
 
-  @ApiOperation ({ summary: 'Get all users(---! ---! needs to be implemented)' })
+  @ApiOperation ({ summary: 'Get all users' })
+  @ApiBearerAuth()
+  // @UseGuards(AdminGuard)
   @Get ()
-  getAll () {
-    // Paginated list of users. Just system admin can get all users
-    return 'Get all users';
+  async getAll (@Res() response: Response, @Query() pageOptionsDto: PageOptionsDto) {
+    response.status(HttpStatus.OK).send(await this.usersService.getList(pageOptionsDto));
   }
 
-  @ApiOperation ({ summary: 'Get a user(---! needs to be implemented)' })
+  @ApiOperation ({ summary: 'Get a user by uuid' })
+  // @UseGuards(AdminGuard)
+  @ApiBearerAuth()
   @Get ('/:uuid')
-  get (uuid: string) {
-    // Get a user by uuid. Just system admin can get a user
-    return 'Get a user ' + uuid;
+  async get (@Res() response: Response, @Param('uuid') uuid: string) {
+    response.status(HttpStatus.OK).send(await this.usersService.getByUUID(uuid));
   }
 
 
-  @ApiOperation ({ summary: 'Block user(---! needs to be implemented)' })
+  @ApiOperation ({ summary: 'Block user' })
+  // @UseGuards(AdminGuard)
+  @ApiBearerAuth()
   @Patch ('block/:uuid')
-  async block () {
-    // Block a user by uuid. Just system admin can block a user
-    // when user is blocked he can't use any of the auth methods
-    return 'BLock a user';
+  async block (@Res() response: Response, @Param('uuid') uuid: string) {
+    response.status(HttpStatus.OK).send(await this.usersService.block(uuid));
   }
 
-  @ApiOperation ({ summary: 'Unblock user(---! needs to be implemented)' })
+  @ApiOperation ({ summary: 'Unblock user' })
+  // @UseGuards(AdminGuard)
+  @ApiBearerAuth()
   @Patch ('unblock/:uuid')
-  async unblock () {
+  async unblock (@Res() response: Response, @Param('uuid') uuid: string) {
     // Unblock a user by uuid. Just system admin can unblock a user
     // when user is unblocked he can use any of the auth methods
-    return 'Unblock a user';
+    response.status(HttpStatus.OK).send(await this.usersService.unblock(uuid));
   }
 
-  @ApiOperation ({ summary: 'Delete user(---! needs to be implemented)' })
+  @ApiOperation ({ summary: 'Delete user' })
+  // @UseGuards(AdminGuard)
+  @ApiBearerAuth()
   @Delete ('/:uuid')
-  async delete (id: number): Promise<any> {
-    // Delete a user by uuid. Just system admin can delete a user
-    // also delete all auth methods attached to the user
-    return await this.usersService.delete (id);
+  async delete (@Res() response: Response, @Param('uuid') uuid: string): Promise<any> {
+    response.status(HttpStatus.OK).send(await this.usersService.delete(uuid));
   }
 
   @ApiOperation ({ summary: 'Attach an auth method to a user(---! needs to be implemented)' })

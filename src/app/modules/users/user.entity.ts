@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typ
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { OauthCredentialEntity } from '@/app/modules/auth/passport-js/entities/oauth-credential.entity';
 
-@Entity ('users')
+@Entity ({name:'users'})
 export class UserEntity {
   @PrimaryGeneratedColumn ()
     id: number;
@@ -25,6 +25,13 @@ export class UserEntity {
     nullable: true,
   })
     email: string;
+
+  @Column ({
+    type: 'boolean',
+    nullable: false,
+    default: false
+  })
+    is_blocked: boolean;
 
   @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;

@@ -1,21 +1,51 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { v4 } from 'uuid';
 import { UserEntity } from '@/app/modules/users/user.entity';
-import { UsersRepository } from '@/app/modules/users/users.repository';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
+import {PageDto, PageMetaDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
+import UsersListResponseDto from '@/app/modules/users/dto/users-list.response.dto';
+import { UserRepository} from '@/app/modules/users/users.repository';
+import {InjectRepository} from '@nestjs/typeorm';
 
 @Injectable ()
 export class UsersService {
   constructor (
-    @InjectRepository (UserEntity)
-    private readonly usersRepository: UsersRepository,
+      @InjectRepository(UserEntity) private readonly userRepository: UserRepository
   ) {
   }
 
+  async getList (pageOptionsDto: PageOptionsDto): Promise<PageDto<UsersListResponseDto>> {
+    const [entities, itemCount] = await this.userRepository.findAndCountAll(pageOptionsDto);
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto,
+    });
+
+    return new PageDto(
+      entities,
+      pageMetaDto,
+    );
+  }
+
+  async getByUUID (uuid: string) {
+    return this.userRepository.findByUUID(uuid);
+  }
+
+  async block (uuid: string) {
+    const user = await this.userRepository.findByUUID(uuid);
+
+    return this.userRepository.block(user);
+  }
+
+  async unblock (uuid: string) {
+    const user = await this.userRepository.findByUUID(uuid);
+
+    return this.userRepository.unblock(user);
+  }
+
   async create (
-    email = null,
-    name = null,
+    email: string = null,
+    name: string = null,
     provider: OauthProvider = null
   ): Promise<UserEntity> {
 
@@ -26,8 +56,8 @@ export class UsersService {
       return existingUser;
     }
 
-    return await this.usersRepository.save ({
-      uuid: v4 (),
+    return await this.userRepository.save ({
+      uuid: v4(),
       email: email || null,
       name: name || null
     });
@@ -39,7 +69,7 @@ export class UsersService {
   ): Promise<UserEntity> {
 
     if (requestProvider === OauthProvider.CLASSIC) {
-      return this.usersRepository.findOne ({
+      return this.userRepository.findOne ({
         where: {
           oAuth: {
             email
@@ -50,7 +80,7 @@ export class UsersService {
     }
 
     if (requestProvider === OauthProvider.GOOGLE) {
-      return this.usersRepository.findOne ({
+      return this.userRepository.findOne ({
         where: {
           classicAuth: {
             email
@@ -63,7 +93,20 @@ export class UsersService {
     return null;
   }
 
-  async delete (id: number): Promise<void> {
-    await this.usersRepository.delete ({ id });
+  async delete (uuid: string): Promise<void> {
+    const user = await this.userRepository.findByUUIDWithRelations(uuid);
+    console.log(user);
+    if (user.classicAuth) {
+      await this.userRepository.manager.remove(user.classicAuth);
+    }
+
+    if (Array.isArray(user.oAuth) && user.oAuth.length) {
+      await Promise.all(user.oAuth.map(async (oAuth) => {
+        await this.userRepository.manager.remove(oAuth);
+      }));
+    }
+
+    await this.userRepository.delete({ uuid });
   }
 }
+

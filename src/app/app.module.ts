@@ -6,6 +6,7 @@ import { SeedService } from '@/database/seeds/seed.service';
 import i18nConfig from '@/app/services/i18n-config';
 import TypeormConnector from '@/database/connectors/typeorm.connector';
 import { PassportModule } from '@nestjs/passport';
+import {JwtService} from '@nestjs/jwt';
 
 @Module ({
   imports: [
@@ -15,7 +16,7 @@ import { PassportModule } from '@nestjs/passport';
     EventEmitterConfig,
     PassportModule.register({session: true})
   ],
-  providers: [SeedService],
+  providers: [SeedService, JwtService],
 })
 export class AppModule implements NestModule {
   configure (consumer: MiddlewareConsumer) {
