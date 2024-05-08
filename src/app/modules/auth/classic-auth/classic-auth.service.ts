@@ -34,7 +34,6 @@ export class ClassicAuthService {
     const existingUser = await this.classicAuthRepository.findOne ({
       where: {
         email: classicAuthLoginPayloadDto.email,
-        status: AuthMethodStatus.ACTIVE,
         user_id: Not (IsNull ())
       },
       relations: ['user']
@@ -49,6 +48,7 @@ export class ClassicAuthService {
           {
             email: existingUser.email,
             name: existingUser.user.name,
+            isActive: existingUser.status === AuthMethodStatus.ACTIVE,
           }
         ), {
           secret: AppConfig.jwt.secret,
@@ -65,12 +65,31 @@ export class ClassicAuthService {
     const activationCode = v4 ();
 
     try {
-      const registeredUser = await this.classicAuthRepository.save({
+      const registeredClassicCredentials = await this.classicAuthRepository.save({
         ...classicAuthRegisterPayloadDto,
         activation_code: activationCode,
         status: AuthMethodStatus.NEW,
         name: classicAuthRegisterPayloadDto.name,
         password: await hash (classicAuthRegisterPayloadDto.password, 10)
+      });
+
+      // check if Google Credentials already exist for this email
+      let existingUser = await this.usersService.findExistingUser (
+        classicAuthRegisterPayloadDto.email,
+        OauthProvider.CLASSIC
+      );
+
+      if (!existingUser) {
+        existingUser = await this.usersService.create (
+          classicAuthRegisterPayloadDto.email,
+          classicAuthRegisterPayloadDto.name
+        );
+      }
+
+      await this.classicAuthRepository.update ({
+        email: classicAuthRegisterPayloadDto.email
+      }, {
+        user_id: existingUser.id
       });
 
       await this.mailerService.sendActivationEmail (
@@ -81,7 +100,7 @@ export class ClassicAuthService {
 
       return plainToInstance (
         ClassicAuthRegisterResponseDto,
-        registeredUser
+        registeredClassicCredentials
       );
 
     } catch (e) {
@@ -116,29 +135,14 @@ export class ClassicAuthService {
       throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
     }
 
-    // check if Google Credentials already exist for this email
-    let existingUser = await this.usersService.findExistingUser (
-      existingClassicCredentials.email,
-      OauthProvider.CLASSIC
-    );
 
-    if (!existingUser) {
-      existingUser = await this.usersService.create (
-        existingClassicCredentials.email,
-        existingClassicCredentials.name
-      );
-    }
-
-    if (!existingUser) {
-      throw new HttpException ('Error creating user', HttpStatus.CONFLICT);
-    }
 
     const result = await this.classicAuthRepository.update ({
       activation_code: token,
       status: AuthMethodStatus.NEW
     }, {
       status: AuthMethodStatus.ACTIVE,
-      user_id: existingUser.id,
+      user_id: existingClassicCredentials.user_id,
       activation_code: null,
       name: existingClassicCredentials.name
     });
