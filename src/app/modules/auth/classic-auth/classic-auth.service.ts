@@ -65,14 +65,6 @@ export class ClassicAuthService {
     const activationCode = v4 ();
 
     try {
-      const registeredClassicCredentials = await this.classicAuthRepository.save({
-        ...classicAuthRegisterPayloadDto,
-        activation_code: activationCode,
-        status: AuthMethodStatus.NEW,
-        name: classicAuthRegisterPayloadDto.name,
-        password: await hash (classicAuthRegisterPayloadDto.password, 10)
-      });
-
       // check if Google Credentials already exist for this email
       let existingUser = await this.usersService.findExistingUser (
         classicAuthRegisterPayloadDto.email,
@@ -86,11 +78,15 @@ export class ClassicAuthService {
         );
       }
 
-      await this.classicAuthRepository.update ({
-        email: classicAuthRegisterPayloadDto.email
-      }, {
+      const registeredClassicCredentials = await this.classicAuthRepository.save({
+        ...classicAuthRegisterPayloadDto,
+        activation_code: activationCode,
+        status: AuthMethodStatus.NEW,
+        name: classicAuthRegisterPayloadDto.name,
+        password: await hash (classicAuthRegisterPayloadDto.password, 10),
         user_id: existingUser.id
       });
+
 
       await this.mailerService.sendActivationEmail (
         classicAuthRegisterPayloadDto.email,
