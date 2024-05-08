@@ -98,6 +98,7 @@ export class ClassicAuthService {
         classicAuthRegisterPayloadDto.name
       );
       await queryRunner.commitTransaction();
+      console.log('registeredClassicCredentials', registeredClassicCredentials);
 
       return plainToInstance (
         ClassicAuthRegisterResponseDto,
@@ -106,6 +107,7 @@ export class ClassicAuthService {
 
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      console.log('Error registering user', error);
       throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
     } finally {
       await queryRunner.release();
