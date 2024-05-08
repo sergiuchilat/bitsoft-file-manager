@@ -17,6 +17,7 @@ import { plainToInstance } from 'class-transformer';
 import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.dto';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
+import { UserEntity } from '@/app/modules/users/user.entity';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -61,8 +62,60 @@ export class ClassicAuthService {
     throw new HttpException ('Invalid credentials', HttpStatus.UNAUTHORIZED);
   }
 
-  async register (classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto): Promise<ClassicAuthRegisterResponseDto> {
+  async register(classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto){
+    const activationCode = v4();
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+
+      let existingUser = await this.usersService.findExistingUser (
+        classicAuthRegisterPayloadDto.email,
+        OauthProvider.CLASSIC
+      );
+
+      if (!existingUser) {
+        existingUser = await queryRunner.manager.save (UserEntity, {
+          email: classicAuthRegisterPayloadDto.email,
+          name: classicAuthRegisterPayloadDto.name,
+          uuid: v4()
+        });
+      }
+
+      const registeredClassicCredentials = await queryRunner.manager.save(ClassicAuthEntity, {
+        ...classicAuthRegisterPayloadDto,
+        activation_code: activationCode,
+        status: AuthMethodStatus.NEW,
+        name: classicAuthRegisterPayloadDto.name,
+        password: await hash (classicAuthRegisterPayloadDto.password, 10),
+        user_id: existingUser.id
+      });
+
+      await this.mailerService.sendActivationEmail (
+        classicAuthRegisterPayloadDto.email,
+        this.generateActivationLink(activationCode),
+        classicAuthRegisterPayloadDto.name
+      );
+      await queryRunner.commitTransaction();
+
+      return plainToInstance (
+        ClassicAuthRegisterResponseDto,
+        registeredClassicCredentials
+      );
+
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async register0 (classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto): Promise<ClassicAuthRegisterResponseDto> {
     const activationCode = v4 ();
+
+
 
     try {
       // check if Google Credentials already exist for this email

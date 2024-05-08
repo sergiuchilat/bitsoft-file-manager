@@ -8,7 +8,6 @@ import { TokenGeneratorService } from '@/app/modules/common/token-generator.serv
 import AppConfig from '@/config/app-config';
 import { JwtService } from '@nestjs/jwt';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
-import { requestProvider } from '@nestjs/core/router/request/request-providers';
 
 @Injectable ()
 export class PassportJsService {
