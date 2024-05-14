@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { OauthCredentialEntity } from '@/app/modules/auth/passport-js/entities/oauth-credential.entity';
-import {UserStatus} from '@/app/modules/users/types/user.status';
+import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 
 @Entity ({name:'users'})
 export class UserEntity {
@@ -29,9 +29,9 @@ export class UserEntity {
 
   @Column({
     nullable: false,
-    default: UserStatus.ACTIVE
+    default: UserStatusEnum.NEW
   })
-    status: UserStatus;
+    status: UserStatusEnum;
 
   @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;

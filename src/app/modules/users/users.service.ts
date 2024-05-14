@@ -3,14 +3,17 @@ import { v4 } from 'uuid';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import {PageDto, PageMetaDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
-import UsersListResponseDto from '@/app/modules/users/dto/users-list.response.dto';
+import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
 import { UserRepository} from '@/app/modules/users/users.repository';
 import {InjectRepository} from '@nestjs/typeorm';
+import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
+import {EntityManager} from 'typeorm';
 
 @Injectable ()
 export class UsersService {
   constructor (
-      @InjectRepository(UserEntity) private readonly userRepository: UserRepository
+      @InjectRepository(UserEntity) private readonly userRepository: UserRepository,
+      private readonly entityManager: EntityManager
   ) {
   }
 
@@ -35,6 +38,12 @@ export class UsersService {
     const user = await this.userRepository.findByUUID(uuid);
 
     return this.userRepository.block(user);
+  }
+
+  async activate(id: number) {
+    return this.userRepository.update(id, {
+      status: UserStatusEnum.ACTIVE,
+    });
   }
 
   async unblock (uuid: string) {
@@ -94,19 +103,15 @@ export class UsersService {
   }
 
   async delete (uuid: string): Promise<void> {
-    const user = await this.userRepository.findByUUIDWithRelations(uuid);
+    await this.entityManager.transaction(async manager => {
+      const user = await manager.findOne(UserEntity, {where:{uuid}});
 
-    if (user.classicAuth) {
-      await this.userRepository.manager.remove(user.classicAuth);
-    }
+      if (!user) {
+        throw new Error('User not found.');
+      }
 
-    if (Array.isArray(user.oAuth) && user.oAuth.length) {
-      await Promise.all(user.oAuth.map(async (oAuth) => {
-        await this.userRepository.manager.remove(oAuth);
-      }));
-    }
-
-    await this.userRepository.delete({ uuid });
+      await manager.remove(user);
+    });
   }
 }
 

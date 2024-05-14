@@ -18,7 +18,7 @@ import { UsersService } from '@/app/modules/users/users.service';
     HttpModule.register ({
       timeout: 5000,
       maxRedirects: 5,
-    })
+    }),
   ],
   providers: [ClassicAuthService, UsersService, JwtService, MailerService],
   controllers: [ClassicAuthController]

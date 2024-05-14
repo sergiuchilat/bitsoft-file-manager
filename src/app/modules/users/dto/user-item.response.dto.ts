@@ -1,7 +1,7 @@
 import {ApiProperty} from '@nestjs/swagger';
 import {Expose} from 'class-transformer';
 
-export default class UsersListResponseDto {
+export default class UserItemResponseDto {
     @ApiProperty ({ example: 1, description: 'Id' })
     @Expose()
       id: number;

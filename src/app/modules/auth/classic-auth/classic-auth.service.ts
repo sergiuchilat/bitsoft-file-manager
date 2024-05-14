@@ -92,18 +92,22 @@ export class ClassicAuthService {
     }
   }
 
-  async activateResend (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, reqUser: any) {
+  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto) {
     try {
       const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email}});
-      const [_, token] = reqUser.headers.authorization?.split(' ');
 
       if(!user) {
         return ;
       }
 
+      const activationCode = v4 ();
+      await this.classicAuthRepository.update({email: user.email},{
+        activation_code: activationCode,
+      });
+
       await this.mailerService.sendActivationEmail (
         classicAuthActivateResendPayloadDto.email,
-        this.generateActivationLink(token),
+        this.generateActivationLink(activationCode),
         user.name
       );
     } catch (e) {
@@ -164,6 +168,8 @@ export class ClassicAuthService {
       activation_code: null,
       name: existingClassicCredentials.name
     });
+
+    await this.usersService.activate(existingUser.id);
 
     if (!result?.affected) {
       throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);

@@ -1,15 +1,15 @@
 import { Repository} from 'typeorm';
 import {UserEntity} from '@/app/modules/users/user.entity';
 import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
-import UsersListResponseDto from '@/app/modules/users/dto/users-list.response.dto';
+import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
 import {NotFoundException} from '@nestjs/common';
-import {UserStatus} from '@/app/modules/users/types/user.status';
+import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 
 export interface UserRepository extends Repository<UserEntity> {
   this: Repository<UserEntity>;
   findAndCountAll(pageOptionsDto: PageOptionsDto): Promise<[UsersListResponseDto[], number]>
   findByUUID(uuid: string): Promise<UserEntity>;
-  findByUUIDWithRelations(uuid: string): Promise<UserEntity>;
+  findByUUIDWithAuthMethods(uuid: string): Promise<UserEntity>;
   block(userEntity: UserEntity): Promise<UserEntity>;
   unblock(userEntity: UserEntity): Promise<UserEntity>;
 }
@@ -45,7 +45,7 @@ export const customUsersRepository: Pick<UserRepository, any> = {
     return user;
   },
 
-  async findByUUIDWithRelations (uuid: string)  {
+  async findByUUIDWithAuthMethods (uuid: string)  {
     const user = await this.findOne({where: {uuid}, relations: ['classicAuth', 'oAuth']});
 
     if(!user) {
@@ -56,10 +56,9 @@ export const customUsersRepository: Pick<UserRepository, any> = {
   },
 
   async block (userEntity: UserEntity)  {
-    return this.save({...userEntity, status: UserStatus.BLOCKED});
+    return this.update({id: userEntity.id}, {status: UserStatusEnum.BLOCKED});
   },
 
   async unblock (userEntity: UserEntity)  {
-    return this.save({...userEntity, status: UserStatus.ACTIVE});
-  }
+    return this.update({id: userEntity.id}, {status: UserStatusEnum.ACTIVE});}
 };

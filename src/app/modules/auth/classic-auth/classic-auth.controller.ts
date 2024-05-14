@@ -1,12 +1,12 @@
 import { Response } from 'express';
-import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
 import ClassicAuthLoginPayloadDto from './dto/classic-auth-login.payload.dto';
 import ClassicAuthActivateResendPayloadDto
   from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
-import {UserEntity} from '@/app/modules/users/user.entity';
+import {I18nService} from 'nestjs-i18n';
 
 @ApiTags ('Auth: Classic')
 @Controller ({
@@ -17,6 +17,7 @@ import {UserEntity} from '@/app/modules/users/user.entity';
 export class ClassicAuthController {
   constructor (
     private readonly classicAuthService: ClassicAuthService,
+    private readonly i18n: I18nService,
   ) {
   }
 
@@ -58,13 +59,16 @@ export class ClassicAuthController {
   async resendActivationEmail (
       @Res () response: Response,
       @Body() classicAuthActivateResendPayloadDto: ClassicAuthActivateResendPayloadDto,
-      @Req() req: Request & { user: UserEntity }
   ) {
-    await this.classicAuthService.activateResend(classicAuthActivateResendPayloadDto, req);
+    await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto);
 
     return response
       .status (HttpStatus.OK)
-      .send ({message: 'If the email is registered, an activation email will be sent'});
+      .send ({
+        message: this.i18n.t('auth.mail.activation', {
+          lang: 'en',
+        })
+      });
   }
 
   @ApiOperation ({summary: 'Request password reset(---! needs to be implemented)'})
