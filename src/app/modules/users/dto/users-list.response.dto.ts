@@ -6,11 +6,11 @@ export default class UsersListResponseDto {
     @Expose()
       id: number;
 
-    @ApiProperty ({ example: '30943-2333', description: 'UUID' })
+    @ApiProperty ({ example: '83db08ca-7e44-4c56-bd21-5cabe3881612', description: 'UUID' })
     @Expose()
       uuid: string;
 
-    @ApiProperty ({ example: 'user 1', description: 'Name' })
+    @ApiProperty ({ example: 'John Doe', description: 'Name' })
     @Expose()
       name: string;
 

@@ -1,9 +1,12 @@
 import { Response } from 'express';
-import { Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res } from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
 import ClassicAuthLoginPayloadDto from './dto/classic-auth-login.payload.dto';
+import ClassicAuthActivateResendPayloadDto
+  from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
+import {UserEntity} from '@/app/modules/users/user.entity';
 
 @ApiTags ('Auth: Classic')
 @Controller ({
@@ -50,18 +53,18 @@ export class ClassicAuthController {
       .send (await this.classicAuthService.activate (token));
   }
 
-  @ApiOperation ({summary: 'Resend activation email(---! needs to be implemented)'})
+  @ApiOperation ({summary: 'Resend activation email'})
   @Post ('activate/resend')
-  resendActivationEmail () {
-    // Resend activation email.
-    // Payload should contain email address
-    // {
-    //   "email": "email@domain.com"
-    // }
-    // after sending email, return success message
-    // if email not found, return also success message to prevent email enumeration attack.
-    // The message "If the email is registered, an activation email will be sent" should be returned
-    return 'resendActivationEmail';
+  async resendActivationEmail (
+      @Res () response: Response,
+      @Body() classicAuthActivateResendPayloadDto: ClassicAuthActivateResendPayloadDto,
+      @Req() req: Request & { user: UserEntity }
+  ) {
+    await this.classicAuthService.activateResend(classicAuthActivateResendPayloadDto, req);
+
+    return response
+      .status (HttpStatus.OK)
+      .send ({message: 'If the email is registered, an activation email will be sent'});
   }
 
   @ApiOperation ({summary: 'Request password reset(---! needs to be implemented)'})

@@ -17,6 +17,8 @@ import { plainToInstance } from 'class-transformer';
 import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.dto';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
+import ClassicAuthActivateResendPayloadDto
+  from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -87,6 +89,25 @@ export class ClassicAuthService {
 
     } catch (e) {
       throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
+    }
+  }
+
+  async activateResend (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, reqUser: any) {
+    try {
+      const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email}});
+      const [_, token] = reqUser.headers.authorization?.split(' ');
+
+      if(!user) {
+        return ;
+      }
+
+      await this.mailerService.sendActivationEmail (
+        classicAuthActivateResendPayloadDto.email,
+        this.generateActivationLink(token),
+        user.name
+      );
+    } catch (e) {
+      throw e;
     }
   }
 

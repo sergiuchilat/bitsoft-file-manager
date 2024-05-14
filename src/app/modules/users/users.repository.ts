@@ -3,6 +3,7 @@ import {UserEntity} from '@/app/modules/users/user.entity';
 import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import UsersListResponseDto from '@/app/modules/users/dto/users-list.response.dto';
 import {NotFoundException} from '@nestjs/common';
+import {UserStatus} from '@/app/modules/users/types/user.status';
 
 export interface UserRepository extends Repository<UserEntity> {
   this: Repository<UserEntity>;
@@ -55,10 +56,10 @@ export const customUsersRepository: Pick<UserRepository, any> = {
   },
 
   async block (userEntity: UserEntity)  {
-    return this.save({...userEntity, is_blocked: true});
+    return this.save({...userEntity, status: UserStatus.BLOCKED});
   },
 
   async unblock (userEntity: UserEntity)  {
-    return this.save({...userEntity, is_blocked: false});
+    return this.save({...userEntity, status: UserStatus.ACTIVE});
   }
 };

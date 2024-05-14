@@ -95,7 +95,7 @@ export class UsersService {
 
   async delete (uuid: string): Promise<void> {
     const user = await this.userRepository.findByUUIDWithRelations(uuid);
-    console.log(user);
+
     if (user.classicAuth) {
       await this.userRepository.manager.remove(user.classicAuth);
     }

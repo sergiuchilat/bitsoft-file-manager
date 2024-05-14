@@ -11,7 +11,7 @@ const config = {
   username: AppConfig.db.user,
   password: AppConfig.db.password,
   database: AppConfig.db.name,
-  entities: ['dist/**/**/*.entity.{ts,js}'],
+  entities: ['dist/**/*.entity.{ts,js}'],
   migrations: ['dist/**/database/migrations/*.js'],
   autoLoadEntities: true,
   synchronize: true,

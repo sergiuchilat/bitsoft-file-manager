@@ -1,5 +1,5 @@
 import {Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Res} from '@nestjs/common';
-import {ApiBearerAuth, ApiOperation, ApiTags} from '@nestjs/swagger';
+import { ApiOperation, ApiTags} from '@nestjs/swagger';
 import { UsersService } from '@/app/modules/users/users.service';
 import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import { Response } from 'express';
@@ -17,16 +17,12 @@ export class UsersController {
   }
 
   @ApiOperation ({ summary: 'Get all users' })
-  @ApiBearerAuth()
-  // @UseGuards(AdminGuard)
   @Get ()
   async getAll (@Res() response: Response, @Query() pageOptionsDto: PageOptionsDto) {
     response.status(HttpStatus.OK).send(await this.usersService.getList(pageOptionsDto));
   }
 
   @ApiOperation ({ summary: 'Get a user by uuid' })
-  // @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @Get ('/:uuid')
   async get (@Res() response: Response, @Param('uuid') uuid: string) {
     response.status(HttpStatus.OK).send(await this.usersService.getByUUID(uuid));
@@ -34,16 +30,12 @@ export class UsersController {
 
 
   @ApiOperation ({ summary: 'Block user' })
-  // @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @Patch ('block/:uuid')
   async block (@Res() response: Response, @Param('uuid') uuid: string) {
     response.status(HttpStatus.OK).send(await this.usersService.block(uuid));
   }
 
   @ApiOperation ({ summary: 'Unblock user' })
-  // @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @Patch ('unblock/:uuid')
   async unblock (@Res() response: Response, @Param('uuid') uuid: string) {
     // Unblock a user by uuid. Just system admin can unblock a user
@@ -52,8 +44,6 @@ export class UsersController {
   }
 
   @ApiOperation ({ summary: 'Delete user' })
-  // @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @Delete ('/:uuid')
   async delete (@Res() response: Response, @Param('uuid') uuid: string): Promise<any> {
     response.status(HttpStatus.OK).send(await this.usersService.delete(uuid));
