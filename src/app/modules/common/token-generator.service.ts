@@ -5,7 +5,8 @@ export class TokenGeneratorService {
         authProvider,
         email: user.email,
         name: user.name,
-        photo: user.photo
+        photo: user.photo,
+        isActive: user.isActive,
       },
       sub
     };
