@@ -6,7 +6,6 @@ import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.d
 import ClassicAuthLoginPayloadDto from './dto/classic-auth-login.payload.dto';
 import ClassicAuthActivateResendPayloadDto
   from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
-import {I18nService} from 'nestjs-i18n';
 
 @ApiTags ('Auth: Classic')
 @Controller ({
@@ -17,7 +16,6 @@ import {I18nService} from 'nestjs-i18n';
 export class ClassicAuthController {
   constructor (
     private readonly classicAuthService: ClassicAuthService,
-    private readonly i18n: I18nService,
   ) {
   }
 
@@ -60,15 +58,9 @@ export class ClassicAuthController {
       @Res () response: Response,
       @Body() classicAuthActivateResendPayloadDto: ClassicAuthActivateResendPayloadDto,
   ) {
-    await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto);
-
     return response
       .status (HttpStatus.OK)
-      .send ({
-        message: this.i18n.t('auth.mail.activation', {
-          lang: 'en',
-        })
-      });
+      .send (await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto));
   }
 
   @ApiOperation ({summary: 'Request password reset(---! needs to be implemented)'})

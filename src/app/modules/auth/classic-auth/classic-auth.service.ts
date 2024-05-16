@@ -20,6 +20,7 @@ import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status'
 import { UserEntity } from '@/app/modules/users/user.entity';
 import ClassicAuthActivateResendPayloadDto
   from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
+import {I18nService} from 'nestjs-i18n';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -30,6 +31,7 @@ export class ClassicAuthService {
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
+    private readonly i18n: I18nService,
   ) {
   }
 
@@ -163,11 +165,16 @@ export class ClassicAuthService {
   }
 
   async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto) {
+    const message = {
+      message: this.i18n.t('auth.mail.activation', {
+        lang: 'en',
+      })
+    };
     try {
       const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email}});
 
       if(!user) {
-        return ;
+        return message;
       }
 
       const activationCode = v4 ();
@@ -180,6 +187,8 @@ export class ClassicAuthService {
         this.generateActivationLink(activationCode),
         user.name
       );
+
+      return message;
     } catch (e) {
       throw e;
     }
@@ -212,28 +221,40 @@ export class ClassicAuthService {
       throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
     }
 
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
+    try {
+      const result = await this.classicAuthRepository.update ({
+        activation_code: token,
+        status: AuthMethodStatus.NEW
+      }, {
+        status: AuthMethodStatus.ACTIVE,
+        user_id: existingClassicCredentials.user_id,
+        activation_code: null,
+        name: existingClassicCredentials.name
+      });
 
-    const result = await this.classicAuthRepository.update ({
-      activation_code: token,
-      status: AuthMethodStatus.NEW
-    }, {
-      status: AuthMethodStatus.ACTIVE,
-      user_id: existingClassicCredentials.user_id,
-      activation_code: null,
-      name: existingClassicCredentials.name
-    });
+      if (!result?.affected) {
+        throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
+      }
 
-    await this.usersService.activate(existingClassicCredentials.user_id);
+      await this.usersService.activate(existingClassicCredentials.user_id);
 
-    if (!result?.affected) {
-      throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
+      await queryRunner.commitTransaction();
+
+      return {
+        token: token,
+        status: AuthMethodStatus.ACTIVE
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.log('Error activate user', error);
+      throw new HttpException ('Error activate user', HttpStatus.CONFLICT);
+    } finally {
+      await queryRunner.release();
     }
-
-    return {
-      token: token,
-      status: AuthMethodStatus.ACTIVE
-    };
   }
 
   async startResetPassword (email: string) {

@@ -1,29 +1,33 @@
-import { Repository} from 'typeorm';
+import {DataSource, Repository, UpdateResult} from 'typeorm';
 import {UserEntity} from '@/app/modules/users/user.entity';
 import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
-import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
-import {NotFoundException} from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 
-export interface UserRepository extends Repository<UserEntity> {
-  this: Repository<UserEntity>;
-  findAndCountAll(pageOptionsDto: PageOptionsDto): Promise<[UsersListResponseDto[], number]>
+export interface UserRepository {
+  findAndCountAll(pageOptionsDto: PageOptionsDto): Promise<[UserEntity[], number]>
   findByUUID(uuid: string): Promise<UserEntity>;
   findByUUIDWithAuthMethods(uuid: string): Promise<UserEntity>;
-  block(userEntity: UserEntity): Promise<UserEntity>;
-  unblock(userEntity: UserEntity): Promise<UserEntity>;
+  block(uuid: string): Promise<UpdateResult>;
+  unblock(uuid: string): Promise<UpdateResult>;
+  this: Repository<UserEntity>;
 }
 
-export const customUsersRepository: Pick<UserRepository, any> = {
+@Injectable()
+export class UsersRepository extends Repository<UserEntity> {
+
+  constructor(private readonly dataSource: DataSource) {
+    super(UserEntity, dataSource.createEntityManager());
+  }
   async findByEmail (email: string): Promise<UserEntity> {
     return await this.findOne ({
       where: {
         email: email
       }
     });
-  },
+  }
 
-  async findAndCountAll (pageOptionsDto: PageOptionsDto) {
+  async findAndCountAll (pageOptionsDto: PageOptionsDto): Promise<[UserEntity[], number]> {
     const [entities, count] = await this.findAndCount({
       order: {
         [pageOptionsDto.orderBy || 'id']: pageOptionsDto.order,
@@ -33,7 +37,7 @@ export const customUsersRepository: Pick<UserRepository, any> = {
     });
 
     return [entities, count];
-  },
+  }
 
   async findByUUID (uuid: string)  {
     const user = await this.findOne({where: {uuid}});
@@ -43,7 +47,7 @@ export const customUsersRepository: Pick<UserRepository, any> = {
     }
 
     return user;
-  },
+  }
 
   async findByUUIDWithAuthMethods (uuid: string)  {
     const user = await this.findOne({where: {uuid}, relations: ['classicAuth', 'oAuth']});
@@ -53,12 +57,14 @@ export const customUsersRepository: Pick<UserRepository, any> = {
     }
 
     return user;
-  },
+  }
 
-  async block (userEntity: UserEntity)  {
-    return this.update({id: userEntity.id}, {status: UserStatusEnum.BLOCKED});
-  },
+  async block (uuid: string)  {
+    return this.update({uuid}, {status: UserStatusEnum.BLOCKED});
+  }
 
-  async unblock (userEntity: UserEntity)  {
-    return this.update({id: userEntity.id}, {status: UserStatusEnum.ACTIVE});}
-};
+  async unblock (uuid: string)  {
+    return this.update({uuid}, {status: UserStatusEnum.ACTIVE});
+  }
+
+}

@@ -8,6 +8,7 @@ import { HttpModule } from '@nestjs/axios';
 import { MailerService } from '@/app/modules/auth/classic-auth/mailer.service';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import { UsersService } from '@/app/modules/users/users.service';
+import {UsersRepository} from '@/app/modules/users/users.repository';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { UsersService } from '@/app/modules/users/users.service';
       maxRedirects: 5,
     }),
   ],
-  providers: [ClassicAuthService, UsersService, JwtService, MailerService],
+  providers: [ClassicAuthService, UsersService, JwtService, MailerService, UsersRepository],
   controllers: [ClassicAuthController]
 })
 export class ClassicAuthModule {}

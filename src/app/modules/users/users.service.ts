@@ -1,24 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { v4 } from 'uuid';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import {PageDto, PageMetaDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
-import { UserRepository} from '@/app/modules/users/users.repository';
-import {InjectRepository} from '@nestjs/typeorm';
+import {UsersRepository} from '@/app/modules/users/users.repository';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 import {EntityManager} from 'typeorm';
 
 @Injectable ()
 export class UsersService {
   constructor (
-      @InjectRepository(UserEntity) private readonly userRepository: UserRepository,
+      private readonly usersRepository: UsersRepository,
       private readonly entityManager: EntityManager
   ) {
   }
 
   async getList (pageOptionsDto: PageOptionsDto): Promise<PageDto<UsersListResponseDto>> {
-    const [entities, itemCount] = await this.userRepository.findAndCountAll(pageOptionsDto);
+    const [entities, itemCount] = await this.usersRepository.findAndCountAll(pageOptionsDto);
     const pageMetaDto = new PageMetaDto({
       itemCount,
       pageOptionsDto,
@@ -31,25 +30,33 @@ export class UsersService {
   }
 
   async getByUUID (uuid: string) {
-    return this.userRepository.findByUUID(uuid);
+    return this.usersRepository.findByUUID(uuid);
   }
 
   async block (uuid: string) {
-    const user = await this.userRepository.findByUUID(uuid);
+    const result = await this.usersRepository.block(uuid);
 
-    return this.userRepository.block(user);
+    if(!result.affected) {
+      throw new HttpException(`User with uuid: ${uuid} not found`, HttpStatus.NOT_FOUND);
+    }
+
+    return result;
   }
 
   async activate(id: number) {
-    return this.userRepository.update(id, {
+    return this.usersRepository.update(id, {
       status: UserStatusEnum.ACTIVE,
     });
   }
 
   async unblock (uuid: string) {
-    const user = await this.userRepository.findByUUID(uuid);
+    const result = await this.usersRepository.unblock(uuid);
 
-    return this.userRepository.unblock(user);
+    if(!result.affected) {
+      throw new HttpException(`User with uuid: ${uuid} not found`, HttpStatus.NOT_FOUND);
+    }
+
+    return result;
   }
 
   async create (
@@ -65,7 +72,7 @@ export class UsersService {
       return existingUser;
     }
 
-    return await this.userRepository.save ({
+    return await this.usersRepository.save ({
       uuid: v4(),
       email: email || null,
       name: name || null
@@ -78,7 +85,7 @@ export class UsersService {
   ): Promise<UserEntity> {
 
     if (requestProvider === OauthProvider.CLASSIC) {
-      return this.userRepository.findOne ({
+      return this.usersRepository.findOne ({
         where: {
           oAuth: {
             email
@@ -89,7 +96,7 @@ export class UsersService {
     }
 
     if (requestProvider === OauthProvider.GOOGLE) {
-      return this.userRepository.findOne ({
+      return this.usersRepository.findOne ({
         where: {
           classicAuth: {
             email
