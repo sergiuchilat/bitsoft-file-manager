@@ -102,8 +102,9 @@ export class PassportJsService {
         photo: existingCredentials.photo
       }
     ), {
-      secret: AppConfig.jwt.secret,
-      expiresIn: AppConfig.jwt.expiresIn
+      secret: AppConfig.jwt.privateKey,
+      expiresIn: AppConfig.jwt.expiresIn,
+      algorithm: "RS256"
     });
 
     await this.oauthCredentialRepository.update (existingCredentials.id, {
