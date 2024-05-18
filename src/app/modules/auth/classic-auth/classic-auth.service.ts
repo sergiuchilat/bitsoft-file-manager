@@ -57,8 +57,9 @@ export class ClassicAuthService {
             isActive: existingUser.status === AuthMethodStatus.ACTIVE,
           }
         ), {
-          secret: AppConfig.jwt.secret,
-          expiresIn: AppConfig.jwt.expiresIn
+          secret: AppConfig.jwt.privateKey,
+          expiresIn: AppConfig.jwt.expiresIn,
+          algorithm: "RS256"
         }),
         refresh_token: null
       };
