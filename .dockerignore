@@ -4,5 +4,5 @@ node_modules
 npm-debug.log
 .env
 jwt
-data
+./data
 dist

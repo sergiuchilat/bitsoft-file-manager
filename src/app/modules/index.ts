@@ -1,9 +1,9 @@
+import { UsersModule } from '@/app/modules/users/users.module';
+import { PassportJsModule } from '@/app/modules/auth/passport-js/passport-js.module';
 import { ClassicAuthModule } from '@/app/modules/auth/classic-auth/classic-auth.module';
-import { GoogleAuthModule } from '@/app/modules/auth/google-auth/google-auth.module';
-import { VkAuthModule } from '@/app/modules/auth/vk-auth/vk-auth.module';
 
 export default [
+  UsersModule,
   ClassicAuthModule,
-  GoogleAuthModule,
-  VkAuthModule
+  PassportJsModule
 ];
