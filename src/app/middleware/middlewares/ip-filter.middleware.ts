@@ -6,7 +6,7 @@ import { BlockedIpEntity } from '@/app/modules/blocked-ip/entities/blocked-ip.en
 import { BlockedIpRepository } from '@/app/modules/blocked-ip/repositories/blocked-ip.repository';
 
 @Injectable()
-export class ProcessIpMiddleware implements NestMiddleware {
+export class IpFilterMiddleware implements NestMiddleware {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: UsersRepository,
@@ -15,7 +15,7 @@ export class ProcessIpMiddleware implements NestMiddleware {
   ) {}
 
   async use(request: any, res: any, next: (error?: any) => void): Promise<void> {
-    const ip = request.connection.remoteAddress;
+    const ip = request.headers['x-forwarded-for'] ?? request.connection.remoteAddress;
     const userUuid = request.user.uuid;
 
     const ipIsBlocked = await this.blockedIpRepository.exist({ where: { ip } });
