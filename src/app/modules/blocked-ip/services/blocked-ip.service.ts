@@ -10,7 +10,7 @@ export class BlockedIpService {
     private readonly blockedIpRepository: BlockedIpRepository,
   ) {}
 
-  getAll() {
+  async getAll(): Promise<BlockedIpEntity[]> {
     return this.blockedIpRepository.find();
   }
 
