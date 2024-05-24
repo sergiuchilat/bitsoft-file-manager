@@ -15,8 +15,8 @@ export class CreateBlockedIpsTable1716469262670 implements MigrationInterface {
           },
           {
             name: 'ip',
-            type: 'varchar',
-            length: '39',
+            type: 'inet',
+            isUnique: true
           },
           {
             name: 'created_at',

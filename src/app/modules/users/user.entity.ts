@@ -27,8 +27,7 @@ export class UserEntity {
     email: string;
 
   @Column({
-    type: 'varchar',
-    length: 39,
+    type: 'inet',
     nullable: true
   })
   last_login_ip: string;

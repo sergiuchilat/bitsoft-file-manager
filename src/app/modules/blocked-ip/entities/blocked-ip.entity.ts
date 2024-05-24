@@ -6,8 +6,8 @@ export class BlockedIpEntity {
   id?: number;
 
   @Column({
-    type: 'varchar',
-    length: 39,
+    type: 'inet',
+    unique: true
   })
   ip: string;
 

@@ -6,8 +6,7 @@ export class AddLoginIpForUsers1716469036498 implements MigrationInterface {
       'users',
       new TableColumn({
         name: 'last_login_ip',
-        type: 'varchar',
-        length: '39',
+        type: 'inet',
         isNullable: true,
       }),
     );
