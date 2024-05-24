@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { BlockedIpService } from '@/app/modules/blocked-ip/services/blocked-ip.service';
 import { BlockedIpActionDto } from '@/app/modules/blocked-ip/dto/blocked-ip-action.dto';
 import { BlockedIpDto } from '@/app/modules/blocked-ip/dto/blocked-ip.dto';
+import { BlockedIpPaginatorDto } from '@/app/modules/blocked-ip/dto/blocked-ip-paginator.dto';
 
 @Controller({
   version: '1',
@@ -18,8 +19,8 @@ export class BlockedIpController {
     type: BlockedIpDto,
     isArray: true,
   })
-  getAll() {
-    return this.blockedIpService.getAll();
+  getAll(@Query() paginator: BlockedIpPaginatorDto) {
+    return this.blockedIpService.getAll(paginator);
   }
 
   @Post()

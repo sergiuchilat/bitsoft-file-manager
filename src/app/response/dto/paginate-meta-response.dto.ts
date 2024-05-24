@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import PaginatorConfigInterface from '@/database/interfaces/paginator-config.interface';
 
 export default class PaginateMetaResponseDto {
   @ApiProperty({
@@ -35,4 +36,12 @@ export default class PaginateMetaResponseDto {
     type: Number,
   })
     currentPage: number;
+
+  constructor(paginator: PaginatorConfigInterface, [entities, totalItems]: [unknown[], number]) {
+    this.itemsPerPage = paginator.limit;
+    this.totalItems = totalItems;
+    this.itemCount = entities.length;
+    this.currentPage = paginator.page;
+    this.totalPages = Math.ceil(totalItems / paginator.limit);
+  }
 }
