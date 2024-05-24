@@ -26,6 +26,13 @@ export class UserEntity {
   })
     email: string;
 
+  @Column({
+    type: 'varchar',
+    length: 39,
+    nullable: true
+  })
+  last_login_ip: string;
+
   @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;
 
