@@ -14,6 +14,6 @@ export class AddLoginIpForUsers1716469036498 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('users', 'login_ip');
+    await queryRunner.dropColumn('users', 'last_login_ip');
   }
 }
