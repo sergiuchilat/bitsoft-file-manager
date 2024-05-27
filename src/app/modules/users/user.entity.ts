@@ -27,11 +27,17 @@ export class UserEntity {
   })
     email: string;
 
-  @Column({
-    nullable: false,
-    default: UserStatusEnum.NEW
-  })
+    @Column({
+        nullable: false,
+        default: UserStatusEnum.NEW
+    })
     status: UserStatusEnum;
+
+  @Column({
+    type: 'inet',
+    nullable: true
+  })
+  last_login_ip: string;
 
   @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;

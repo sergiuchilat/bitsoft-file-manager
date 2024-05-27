@@ -6,6 +6,10 @@ import { SeedService } from '@/database/seeds/seed.service';
 import i18nConfig from '@/app/services/i18n-config';
 import TypeormConnector from '@/database/connectors/typeorm.connector';
 import { PassportModule } from '@nestjs/passport';
+import {JwtModule} from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from '@/app/modules/users/user.entity';
+import { BlockedIpEntity } from '@/app/modules/blocked-ip/entities/blocked-ip.entity';
 
 @Module ({
   imports: [
@@ -13,7 +17,9 @@ import { PassportModule } from '@nestjs/passport';
     i18nConfig,
     ...AppModules,
     EventEmitterConfig,
-    PassportModule.register({session: true})
+    JwtModule,
+    PassportModule.register({session: true}),
+    TypeOrmModule.forFeature([UserEntity, BlockedIpEntity])
   ],
   providers: [SeedService],
 })
