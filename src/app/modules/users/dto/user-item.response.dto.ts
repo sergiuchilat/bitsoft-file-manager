@@ -1,5 +1,6 @@
 import {ApiProperty} from '@nestjs/swagger';
 import {Expose} from 'class-transformer';
+import {IsEmail} from 'class-validator';
 
 export default class UserItemResponseDto {
     @ApiProperty ({ example: 1, description: 'Id' })
@@ -16,5 +17,6 @@ export default class UserItemResponseDto {
 
     @ApiProperty ({ example: 'user@gmail.com', description: 'Email' })
     @Expose()
+    @IsEmail()
       email: string;
 }

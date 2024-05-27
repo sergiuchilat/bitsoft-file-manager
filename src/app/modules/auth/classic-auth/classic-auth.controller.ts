@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
@@ -46,10 +46,11 @@ export class ClassicAuthController {
   async activate (
     @Res () response: Response,
     @Param ('token', ParseUUIDPipe) token: string,
+    @Req () request: Request,
   ) {
     response
       .status (HttpStatus.OK)
-      .send (await this.classicAuthService.activate (token));
+      .send (await this.classicAuthService.activate (token, request));
   }
 
   @ApiOperation ({summary: 'Resend activation email'})
@@ -57,10 +58,11 @@ export class ClassicAuthController {
   async resendActivationEmail (
       @Res () response: Response,
       @Body() classicAuthActivateResendPayloadDto: ClassicAuthActivateResendPayloadDto,
+      @Req() request: Request
   ) {
     return response
       .status (HttpStatus.OK)
-      .send (await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto));
+      .send (await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto, request));
   }
 
   @ApiOperation ({summary: 'Request password reset(---! needs to be implemented)'})

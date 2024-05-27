@@ -59,7 +59,7 @@ export class ClassicAuthService {
         ), {
           secret: AppConfig.jwt.privateKey,
           expiresIn: AppConfig.jwt.expiresIn,
-          algorithm: "RS256"
+          algorithm: 'RS256'
         }),
         refresh_token: null
       };
@@ -165,14 +165,14 @@ export class ClassicAuthService {
     }
   }
 
-  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto) {
+  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, request: Request) {
     const message = {
       message: this.i18n.t('auth.mail.activation', {
-        lang: 'en',
+        lang: request.headers['l-localization'] || 'en',
       })
     };
     try {
-      const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email}});
+      const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email }});
 
       if(!user) {
         return message;
@@ -191,11 +191,11 @@ export class ClassicAuthService {
 
       return message;
     } catch (e) {
-      throw e;
+      throw new HttpException ('Error sending activation message', HttpStatus.BAD_REQUEST);
     }
   }
 
-  async activate (token: string) {
+  async activate (token: string, request: Request) {
 
     // await this.classicAuthRepository.delete ({
     //   status: AuthMethodStatusEnum.NEW,
@@ -238,7 +238,12 @@ export class ClassicAuthService {
       });
 
       if (!result?.affected) {
-        throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
+        const message = {
+          message: this.i18n.t('auth.errors.invalid_token', {
+            lang: request.headers['l-localization'] || 'en',
+          })
+        };
+        throw new HttpException (message, HttpStatus.NOT_FOUND);
       }
 
       await this.usersService.activate(existingClassicCredentials.user_id);
@@ -252,7 +257,12 @@ export class ClassicAuthService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.log('Error activate user', error);
-      throw new HttpException ('Error activate user', HttpStatus.CONFLICT);
+      const message = {
+        message: this.i18n.t('auth.errors.activate_user', {
+          lang: request.headers['l-localization'] || 'en',
+        })
+      };
+      throw new HttpException (message, HttpStatus.CONFLICT);
     } finally {
       await queryRunner.release();
     }

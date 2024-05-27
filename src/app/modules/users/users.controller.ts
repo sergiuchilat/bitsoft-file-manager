@@ -1,4 +1,4 @@
-import {Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Res} from '@nestjs/common';
+import {Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Req, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags} from '@nestjs/swagger';
 import { UsersService } from '@/app/modules/users/users.service';
 import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
@@ -24,8 +24,8 @@ export class UsersController {
 
   @ApiOperation ({ summary: 'Get a user by uuid' })
   @Get ('/:uuid')
-  async get (@Res() response: Response, @Param('uuid') uuid: string) {
-    response.status(HttpStatus.OK).send(await this.usersService.getByUUID(uuid));
+  async get (@Res() response: Response, @Param('uuid') uuid: string, @Req() request: Request) {
+    response.status(HttpStatus.OK).send(await this.usersService.getByUUID(uuid, request));
   }
 
 

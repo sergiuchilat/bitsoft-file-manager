@@ -2,7 +2,7 @@ import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { v4 } from 'uuid';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
-import {PageDto, PageMetaDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
+import {PageDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
 import {UsersRepository} from '@/app/modules/users/users.repository';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
@@ -17,20 +17,11 @@ export class UsersService {
   }
 
   async getList (pageOptionsDto: PageOptionsDto): Promise<PageDto<UsersListResponseDto>> {
-    const [entities, itemCount] = await this.usersRepository.findAndCountAll(pageOptionsDto);
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto,
-    });
-
-    return new PageDto(
-      entities,
-      pageMetaDto,
-    );
+    return await this.usersRepository.findAllAndCount(pageOptionsDto);
   }
 
-  async getByUUID (uuid: string) {
-    return this.usersRepository.findByUUID(uuid);
+  async getByUUID (uuid: string, request: Request) {
+    return this.usersRepository.findByUUID(uuid, request);
   }
 
   async block (uuid: string) {

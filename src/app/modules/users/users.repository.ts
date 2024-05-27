@@ -1,11 +1,13 @@
 import {DataSource, Repository, UpdateResult} from 'typeorm';
 import {UserEntity} from '@/app/modules/users/user.entity';
-import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
+import {PageDto, PageMetaDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import {Injectable, NotFoundException} from '@nestjs/common';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
+import {I18nService} from 'nestjs-i18n';
+import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
 
 export interface UserRepository {
-  findAndCountAll(pageOptionsDto: PageOptionsDto): Promise<[UserEntity[], number]>
+  findAllAndCount(pageOptionsDto: PageOptionsDto): Promise<[UserEntity[], number]>
   findByUUID(uuid: string): Promise<UserEntity>;
   findByUUIDWithAuthMethods(uuid: string): Promise<UserEntity>;
   block(uuid: string): Promise<UpdateResult>;
@@ -16,7 +18,9 @@ export interface UserRepository {
 @Injectable()
 export class UsersRepository extends Repository<UserEntity> {
 
-  constructor(private readonly dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource,
+              private readonly i18n: I18nService,
+  ) {
     super(UserEntity, dataSource.createEntityManager());
   }
   async findByEmail (email: string): Promise<UserEntity> {
@@ -27,8 +31,8 @@ export class UsersRepository extends Repository<UserEntity> {
     });
   }
 
-  async findAndCountAll (pageOptionsDto: PageOptionsDto): Promise<[UserEntity[], number]> {
-    const [entities, count] = await this.findAndCount({
+  async findAllAndCount (pageOptionsDto: PageOptionsDto): Promise<PageDto<UsersListResponseDto>> {
+    const [entities, itemCount] = await this.findAndCount({
       order: {
         [pageOptionsDto.orderBy || 'id']: pageOptionsDto.order,
       },
@@ -36,24 +40,28 @@ export class UsersRepository extends Repository<UserEntity> {
       skip: (pageOptionsDto.page - 1) * pageOptionsDto.per_page
     });
 
-    return [entities, count];
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto,
+    });
+
+    return new PageDto(
+      entities,
+      pageMetaDto,
+    );
   }
 
-  async findByUUID (uuid: string)  {
+  async findByUUID (uuid: string, request: Request)  {
     const user = await this.findOne({where: {uuid}});
 
     if(!user) {
-      throw new NotFoundException(`User with uuid: ${uuid} not found!`);
-    }
-
-    return user;
-  }
-
-  async findByUUIDWithAuthMethods (uuid: string)  {
-    const user = await this.findOne({where: {uuid}, relations: ['classicAuth', 'oAuth']});
-
-    if(!user) {
-      throw new NotFoundException(`User with uuid: ${uuid} not found!`);
+      const message = {
+        message: this.i18n.t('auth.errors.user_not_found', {
+          lang: request.headers['l-localization'] || 'en',
+          args: {uuid}
+        })
+      };
+      throw new NotFoundException(message);
     }
 
     return user;
