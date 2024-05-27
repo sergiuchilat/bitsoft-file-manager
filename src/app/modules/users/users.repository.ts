@@ -1,13 +1,15 @@
 import {DataSource, Repository, UpdateResult} from 'typeorm';
 import {UserEntity} from '@/app/modules/users/user.entity';
-import {PageDto, PageMetaDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import {Injectable, NotFoundException} from '@nestjs/common';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 import {I18nService} from 'nestjs-i18n';
 import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
+import {PaginateResponseDto} from '@/app/response/dto/paginate-response.dto';
+import PaginatorConfigInterface from '@/database/interfaces/paginator-config.interface';
+import {UserPaginatorDto} from '@/app/modules/users/dto/user-paginator.dto';
 
 export interface UserRepository {
-  findAllAndCount(pageOptionsDto: PageOptionsDto): Promise<[UserEntity[], number]>
+  findAllAndCount(pageOptionsDto: PaginatorConfigInterface): Promise<[UserEntity[], number]>
   findByUUID(uuid: string): Promise<UserEntity>;
   findByUUIDWithAuthMethods(uuid: string): Promise<UserEntity>;
   block(uuid: string): Promise<UpdateResult>;
@@ -31,24 +33,13 @@ export class UsersRepository extends Repository<UserEntity> {
     });
   }
 
-  async findAllAndCount (pageOptionsDto: PageOptionsDto): Promise<PageDto<UsersListResponseDto>> {
-    const [entities, itemCount] = await this.findAndCount({
-      order: {
-        [pageOptionsDto.orderBy || 'id']: pageOptionsDto.order,
-      },
-      take: pageOptionsDto.per_page,
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.per_page
+  async findAllAndCount (userPaginatorDto: UserPaginatorDto): Promise<PaginateResponseDto<UsersListResponseDto>> {
+    const response = await this.findAndCount({
+      take: userPaginatorDto.limit,
+      skip: (userPaginatorDto.page - 1) * userPaginatorDto.limit
     });
 
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto,
-    });
-
-    return new PageDto(
-      entities,
-      pageMetaDto,
-    );
+    return new PaginateResponseDto(userPaginatorDto, response);
   }
 
   async findByUUID (uuid: string, request: Request)  {

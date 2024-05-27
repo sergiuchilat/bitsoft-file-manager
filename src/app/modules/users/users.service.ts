@@ -2,11 +2,12 @@ import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { v4 } from 'uuid';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
-import {PageDto, PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto';
 import {UsersRepository} from '@/app/modules/users/users.repository';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 import {EntityManager} from 'typeorm';
+import {PaginateResponseDto} from '@/app/response/dto/paginate-response.dto';
+import {UserPaginatorDto} from '@/app/modules/users/dto/user-paginator.dto';
 
 @Injectable ()
 export class UsersService {
@@ -16,8 +17,8 @@ export class UsersService {
   ) {
   }
 
-  async getList (pageOptionsDto: PageOptionsDto): Promise<PageDto<UsersListResponseDto>> {
-    return await this.usersRepository.findAllAndCount(pageOptionsDto);
+  async getList (userPaginatorDto: UserPaginatorDto): Promise<PaginateResponseDto<UsersListResponseDto>> {
+    return await this.usersRepository.findAllAndCount(userPaginatorDto);
   }
 
   async getByUUID (uuid: string, request: Request) {

@@ -1,8 +1,8 @@
 import {Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Req, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags} from '@nestjs/swagger';
 import { UsersService } from '@/app/modules/users/users.service';
-import {PageOptionsDto} from '@/app/response/dto/paginate-meta-response.dto';
 import { Response } from 'express';
+import {UserPaginatorDto} from '@/app/modules/users/dto/user-paginator.dto';
 
 @ApiTags ('Users')
 @Controller ({
@@ -18,8 +18,8 @@ export class UsersController {
 
   @ApiOperation ({ summary: 'Get all users' })
   @Get ()
-  async getAll (@Res() response: Response, @Query() pageOptionsDto: PageOptionsDto) {
-    response.status(HttpStatus.OK).send(await this.usersService.getList(pageOptionsDto));
+  async getAll (@Res() response: Response, @Query() userPaginatorDto: UserPaginatorDto) {
+    response.status(HttpStatus.OK).send(await this.usersService.getList(userPaginatorDto));
   }
 
   @ApiOperation ({ summary: 'Get a user by uuid' })
