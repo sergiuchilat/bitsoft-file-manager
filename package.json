@@ -57,6 +57,7 @@
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
     "csv-parser": "^3.0.0",
+    "dayjs": "^1.11.11",
     "discord.js": "^14.12.1",
     "dotenv": "^16.0.3",
     "express-session": "^1.18.0",
