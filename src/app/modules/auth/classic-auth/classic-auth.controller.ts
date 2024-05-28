@@ -29,6 +29,18 @@ export class ClassicAuthController {
       .send (await this.classicAuthService.login (classicAuthLoginPayloadDto, request));
   }
 
+  @ApiOperation ({summary: 'Refresh token'})
+  @Post ('refresh-token')
+  async refreshToken (
+    @Body() refreshToken: string,
+    @Res () response: Response,
+    @Req () request: Request,
+  ) {
+    response
+      .status (HttpStatus.OK)
+      .send (await this.classicAuthService.refreshToken (refreshToken, request));
+  }
+
   @ApiOperation ({summary: 'User registration with email and password'})
   @Post ('register')
   async register (
