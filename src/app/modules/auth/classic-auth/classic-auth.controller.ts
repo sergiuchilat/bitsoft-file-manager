@@ -4,6 +4,9 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
 import ClassicAuthLoginPayloadDto from './dto/classic-auth-login.payload.dto';
+import {
+  ClassicAuthRefreshTokenPayloadDto
+} from '@/app/modules/auth/classic-auth/dto/classic-auth-refresh-token.payload.dto';
 
 @ApiTags ('Auth: Classic')
 @Controller ({
@@ -29,16 +32,16 @@ export class ClassicAuthController {
       .send (await this.classicAuthService.login (classicAuthLoginPayloadDto, request));
   }
 
+  @Post ('/refresh-token')
   @ApiOperation ({summary: 'Refresh token'})
-  @Post ('refresh-token')
   async refreshToken (
-    @Body() refreshToken: string,
+    @Body() classicAuthRefreshTokenPayloadDto: ClassicAuthRefreshTokenPayloadDto,
     @Res () response: Response,
     @Req () request: Request,
   ) {
     response
       .status (HttpStatus.OK)
-      .send (await this.classicAuthService.refreshToken (refreshToken, request));
+      .send (await this.classicAuthService.refreshToken (classicAuthRefreshTokenPayloadDto, request));
   }
 
   @ApiOperation ({summary: 'User registration with email and password'})

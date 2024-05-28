@@ -19,6 +19,9 @@ import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
 import { UserEntity } from '@/app/modules/users/user.entity';
 import {Request} from 'express';
+import {
+  ClassicAuthRefreshTokenPayloadDto
+} from '@/app/modules/auth/classic-auth/dto/classic-auth-refresh-token.payload.dto';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -100,9 +103,9 @@ export class ClassicAuthService {
     }
   }
 
-  async refreshToken (refreshToken: string, request: Request) {
+  async refreshToken (classicAuthRefreshTokenPayloadDto: ClassicAuthRefreshTokenPayloadDto, request: Request) {
     try {
-      const payload = this.jwtService.verify(refreshToken, {
+      const payload = this.jwtService.verify(classicAuthRefreshTokenPayloadDto.refreshToken, {
         algorithms: ['RS256'],
         publicKey: AppConfig.jwt.publicKey,
       });

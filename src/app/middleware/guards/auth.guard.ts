@@ -7,7 +7,7 @@ import AppConfig from '@/config/app-config';
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    return this.validateRequest(request.user, request.host);
+    return this.validateRequest(request.user, request.hostname);
   }
 
   private validateRequest(user: RequestUserInterface, host: string): boolean {
@@ -15,13 +15,9 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    if (!user.roles) {
-      throw new UnauthorizedException();
-    }
-
     const crossDomainToken = AppConfig.app.cross_domain_token === '1';
 
-    if (!crossDomainToken) {
+    if (crossDomainToken) {
       const requestDomain = this.getRequestDomain(user);
       if (!this.isSubdomainOf(host, requestDomain)) {
         throw new UnauthorizedException('Token domain mismatch');
