@@ -18,6 +18,7 @@ import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.d
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
 import { UserEntity } from '@/app/modules/users/user.entity';
+import {Request} from 'express';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -31,7 +32,7 @@ export class ClassicAuthService {
   ) {
   }
 
-  async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto): Promise<AuthLoginResponseDto> {
+  async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto, request: Request): Promise<AuthLoginResponseDto> {
     const existingUser = await this.classicAuthRepository.findOne ({
       where: {
         email: classicAuthLoginPayloadDto.email,
@@ -40,7 +41,6 @@ export class ClassicAuthService {
       relations: ['user']
     });
     const passwordMatch = await compare (classicAuthLoginPayloadDto.password, existingUser?.password || '');
-
     if (existingUser && passwordMatch) {
       return {
         token: this.jwtService.sign (TokenGeneratorService.generatePayload (
@@ -50,11 +50,12 @@ export class ClassicAuthService {
             email: existingUser.email,
             name: existingUser.user.name,
             isActive: existingUser.status === AuthMethodStatus.ACTIVE,
-          }
+            domain: request.hostname,
+          },
         ), {
           secret: AppConfig.jwt.privateKey,
           expiresIn: AppConfig.jwt.expiresIn,
-          algorithm: "RS256"
+          algorithm: 'RS256'
         }),
         refresh_token: null
       };

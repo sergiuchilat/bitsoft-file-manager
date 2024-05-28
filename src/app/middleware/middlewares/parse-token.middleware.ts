@@ -11,7 +11,6 @@ export class ParseTokenMiddleware implements NestMiddleware {
     //console.log('ParseTokenMiddleware')
     try {
       const token = this.extractTokenFromHeader(req);
-
       const parsedToken = await this.jwtService.verify(token, {
         algorithms: ['RS256'],
         publicKey: AppConfig.jwt.publicKey,
@@ -20,6 +19,7 @@ export class ParseTokenMiddleware implements NestMiddleware {
       req.user = {
         uuid: parsedToken.sub,
         roles: parsedToken.roles,
+        domain: parsedToken.domain
       };
       next();
     } catch (e) {

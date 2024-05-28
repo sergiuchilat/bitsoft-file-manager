@@ -32,7 +32,8 @@ export default class EnvConfigStrategy {
         session: {
           secret: process.env.SESSION_SECRET,
         },
-        log: {
+        cross_domain_token: process.env.CROSS_DOMAIN_TOKEN,
+        log: { 
           custom: process.env.APP_LOG_CUSTOM === 'true',
           levels: {
             error: {

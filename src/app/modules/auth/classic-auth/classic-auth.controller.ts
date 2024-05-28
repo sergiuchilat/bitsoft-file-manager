@@ -1,5 +1,5 @@
-import { Response } from 'express';
-import { Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Res } from '@nestjs/common';
+import {Request, Response} from 'express';
+import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
 import ClassicAuthRegisterPayloadDto from './dto/classic-auth-register.payload.dto';
@@ -22,10 +22,11 @@ export class ClassicAuthController {
   async login (
     @Body() classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto,
     @Res () response: Response,
+    @Req () request: Request
   ) {
     response
       .status (HttpStatus.OK)
-      .send (await this.classicAuthService.login (classicAuthLoginPayloadDto));
+      .send (await this.classicAuthService.login (classicAuthLoginPayloadDto, request));
   }
 
   @ApiOperation ({summary: 'User registration with email and password'})

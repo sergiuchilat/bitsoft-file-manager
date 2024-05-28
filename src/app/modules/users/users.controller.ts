@@ -1,6 +1,7 @@
-import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import {Controller, Delete, Get, Patch, Post, UseGuards} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from '@/app/modules/users/users.service';
+import {AuthGuard} from '@/app/middleware/guards/auth.guard';
 
 @ApiTags ('Users')
 @Controller ({
@@ -16,6 +17,7 @@ export class UsersController {
 
   @ApiOperation ({ summary: 'Get all users(---! ---! needs to be implemented)' })
   @Get ()
+  @UseGuards(AuthGuard)
   getAll () {
     // Paginated list of users. Just system admin can get all users
     return 'Get all users';
