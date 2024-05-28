@@ -5,10 +5,6 @@ import { ParseTokenMiddleware } from '@/app/middleware/middlewares/parse-token.m
 import {UsersController} from '@/app/modules/users/users.controller';
 
 export default [
-  // {
-  //   guard: ParseTokenMiddleware,
-  //   routes: ClassicAuthController,
-  // },
   {
     guard: ParseTokenMiddleware,
     routes: PassportJsController,

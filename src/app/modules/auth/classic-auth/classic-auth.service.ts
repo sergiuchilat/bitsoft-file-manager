@@ -22,7 +22,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {Request} from 'express';
 import {
-    ClassicAuthRefreshTokenPayloadDto
+  ClassicAuthRefreshTokenPayloadDto
 } from '@/app/modules/auth/classic-auth/dto/classic-auth-refresh-token.payload.dto';
 
 dayjs.extend(utc);
