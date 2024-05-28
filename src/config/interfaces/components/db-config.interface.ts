@@ -7,9 +7,9 @@ export enum DbDriver {
 }
 
 export default interface DbConfigInterface {
-  driver: string;
+  driver: DbDriver;
   host: string;
-  port: string;
+  port: number;
   user: string;
   password: string;
   name: string;

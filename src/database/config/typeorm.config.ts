@@ -4,7 +4,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 console.log('AppConfig.db', AppConfig.db);
 
-const config = {
+const config: DataSourceOptions = {
   type: AppConfig.db.driver,
   host: AppConfig.db.host,
   port: AppConfig.db.port,
@@ -13,7 +13,6 @@ const config = {
   database: AppConfig.db.name,
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/**/database/migrations/*.js'],
-  autoLoadEntities: true,
   synchronize: true,
   logging: true,
   //logger: 'file',
@@ -27,6 +26,9 @@ const config = {
   },
 };
 
-export default registerAs('typeorm', () => config);
+export default registerAs('typeorm', () => ({
+  ...config,
+  autoLoadEntities: true,
+}));
 
-export const connectionSource = new DataSource(config as DataSourceOptions);
+export const connectionSource = new DataSource(config);
