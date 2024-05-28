@@ -207,9 +207,6 @@ export class ClassicAuthService {
       name: existingClassicCredentials.name
     });
 
-    console.log(existingClassicCredentials.created_at);
-    console.log(this.calculateCreationDateOfTokenToBeExpired());
-
     if (!result?.affected) {
       throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
     }
@@ -220,7 +217,7 @@ export class ClassicAuthService {
     };
   }
 
-  calculateCreationDateOfTokenToBeExpired() {
+  private calculateCreationDateOfTokenToBeExpired() {
     return dayjs()
       .utc()
       .subtract(this.codeExpiresIn, 'seconds')
