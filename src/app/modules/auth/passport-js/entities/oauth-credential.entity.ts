@@ -62,6 +62,7 @@ export class OauthCredentialEntity {
 
   @Column({
     nullable: false,
+    type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP',
   })
     token_valid_until: Date;
