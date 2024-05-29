@@ -43,6 +43,8 @@ export class MailerService {
           console.error ('error', error);
           return error;
         });
+
+      console.log ('Email sent to', email);
     } catch (e) {
       console.error (e);
     }
