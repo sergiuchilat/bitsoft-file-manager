@@ -21,7 +21,7 @@ import { UserEntity } from '@/app/modules/users/user.entity';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import ClassicAuthActivateResendPayloadDto
-    from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
+  from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
 import {I18nService} from 'nestjs-i18n';
 import {Language} from '@/app/enum/language.enum';
 
@@ -129,37 +129,37 @@ export class ClassicAuthService {
     }
   }
 
-    async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, language: Language) {
-        const message = {
-            message: this.i18n.t('auth.mail.activation', {
-                lang: language,
-            })
-        };
-        try {
-            const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email }});
+  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, language: Language) {
+    const message = {
+      message: this.i18n.t('auth.mail.activation', {
+        lang: language,
+      })
+    };
+    try {
+      const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email }});
 
-            if(!user) {
-                return message;
-            }
+      if(!user) {
+        return message;
+      }
 
-            const activationCode = v4 ();
-            await this.classicAuthRepository.update({email: user.email},{
-                activation_code: activationCode,
-            });
+      const activationCode = v4 ();
+      await this.classicAuthRepository.update({email: user.email},{
+        activation_code: activationCode,
+      });
 
-            await this.mailerService.sendActivationEmail (
-                classicAuthActivateResendPayloadDto.email,
-                this.generateActivationLink(activationCode),
-                user.name
-            );
+      await this.mailerService.sendActivationEmail (
+        classicAuthActivateResendPayloadDto.email,
+        this.generateActivationLink(activationCode),
+        user.name
+      );
 
-            return message;
-        } catch (e) {
-            throw new HttpException ('Error sending activation message', HttpStatus.BAD_REQUEST);
-        }
+      return message;
+    } catch (e) {
+      throw new HttpException ('Error sending activation message', HttpStatus.BAD_REQUEST);
     }
+  }
 
-  async activate (token: string) {
+  async activate (token: string, language: Language) {
 
     // await this.classicAuthRepository.delete ({
     //   status: AuthMethodStatusEnum.NEW,
@@ -190,17 +190,17 @@ export class ClassicAuthService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-      try {
-    const result = await this.classicAuthRepository.update ({
-      activation_code: token,
-      status: AuthMethodStatus.NEW,
-      created_at: MoreThan(this.calculateCreationDateOfTokenToBeExpired())
-    }, {
-      status: AuthMethodStatus.ACTIVE,
-      user_id: existingClassicCredentials.user_id,
-      activation_code: null,
-      name: existingClassicCredentials.name
-    });
+    try {
+      const result = await this.classicAuthRepository.update ({
+        activation_code: token,
+        status: AuthMethodStatus.NEW,
+        created_at: MoreThan(this.calculateCreationDateOfTokenToBeExpired())
+      }, {
+        status: AuthMethodStatus.ACTIVE,
+        user_id: existingClassicCredentials.user_id,
+        activation_code: null,
+        name: existingClassicCredentials.name
+      });
 
       if (!result?.affected) {
         const message = {
