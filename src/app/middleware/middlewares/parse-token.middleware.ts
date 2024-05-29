@@ -11,6 +11,10 @@ export class ParseTokenMiddleware implements NestMiddleware {
     //console.log('ParseTokenMiddleware')
     try {
       const token = this.extractTokenFromHeader(req);
+      if (!token) {
+        next();
+        return;
+      }
 
       const parsedToken = await this.jwtService.verify(token, {
         algorithms: ['RS256'],

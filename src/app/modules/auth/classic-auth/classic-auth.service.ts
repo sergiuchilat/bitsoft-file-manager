@@ -61,7 +61,7 @@ export class ClassicAuthService {
         ), {
           secret: AppConfig.jwt.privateKey,
           expiresIn: AppConfig.jwt.expiresIn,
-          algorithm: "RS256"
+          algorithm: 'RS256'
         }),
         refresh_token: null
       };
@@ -75,7 +75,7 @@ export class ClassicAuthService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    console.log('classicAuthRegisterPayloadDto', classicAuthRegisterPayloadDto);
     try {
 
       let existingUser = await this.usersService.findExistingUser (
@@ -119,51 +119,6 @@ export class ClassicAuthService {
       throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
     } finally {
       await queryRunner.release();
-    }
-  }
-
-  async register0 (classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto): Promise<ClassicAuthRegisterResponseDto> {
-    const activationCode = v4 ();
-
-
-
-    try {
-      // check if Google Credentials already exist for this email
-      let existingUser = await this.usersService.findExistingUser (
-        classicAuthRegisterPayloadDto.email,
-        OauthProvider.CLASSIC
-      );
-
-      if (!existingUser) {
-        existingUser = await this.usersService.create (
-          classicAuthRegisterPayloadDto.email,
-          classicAuthRegisterPayloadDto.name
-        );
-      }
-
-      const registeredClassicCredentials = await this.classicAuthRepository.save({
-        ...classicAuthRegisterPayloadDto,
-        activation_code: activationCode,
-        status: AuthMethodStatus.NEW,
-        name: classicAuthRegisterPayloadDto.name,
-        password: await hash (classicAuthRegisterPayloadDto.password, 10),
-        user_id: existingUser.id
-      });
-
-
-      await this.mailerService.sendActivationEmail (
-        classicAuthRegisterPayloadDto.email,
-        this.generateActivationLink(activationCode),
-        classicAuthRegisterPayloadDto.name
-      );
-
-      return plainToInstance (
-        ClassicAuthRegisterResponseDto,
-        registeredClassicCredentials
-      );
-
-    } catch (e) {
-      throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
     }
   }
 
