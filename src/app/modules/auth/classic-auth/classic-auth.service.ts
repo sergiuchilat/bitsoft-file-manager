@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
-import { DataSource, IsNull, Not } from 'typeorm';
+import { DataSource, IsNull, MoreThan, Not } from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { ClassicAuthRepository } from '@/app/modules/auth/classic-auth/classic-auth.repository';
 import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.payload.dto';
@@ -18,13 +18,20 @@ import AuthLoginResponseDto from '@/app/modules/common/dto/auth-login.response.d
 import { OauthProvider } from '@/app/modules/common/enums/provider.enum';
 import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
 import { UserEntity } from '@/app/modules/users/user.entity';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import ClassicAuthActivateResendPayloadDto
-  from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
+    from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
 import {I18nService} from 'nestjs-i18n';
 import {Language} from '@/app/enum/language.enum';
 
+dayjs.extend(utc);
+
+
 @Injectable ()
 export class ClassicAuthService {
+  private readonly codeExpiresIn: number;
+
   constructor (
     @InjectRepository (ClassicAuthEntity)
     private readonly classicAuthRepository: ClassicAuthRepository,
@@ -34,6 +41,7 @@ export class ClassicAuthService {
     private readonly mailerService: MailerService,
     private readonly i18n: I18nService,
   ) {
+    this.codeExpiresIn = AppConfig.authProviders.classic.code_expires_in;
   }
 
   async login (classicAuthLoginPayloadDto: ClassicAuthLoginPayloadDto): Promise<AuthLoginResponseDto> {
@@ -227,16 +235,17 @@ export class ClassicAuthService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    try {
-      const result = await this.classicAuthRepository.update ({
-        activation_code: token,
-        status: AuthMethodStatus.NEW
-      }, {
-        status: AuthMethodStatus.ACTIVE,
-        user_id: existingClassicCredentials.user_id,
-        activation_code: null,
-        name: existingClassicCredentials.name
-      });
+      try {
+    const result = await this.classicAuthRepository.update ({
+      activation_code: token,
+      status: AuthMethodStatus.NEW,
+      created_at: MoreThan(this.calculateCreationDateOfTokenToBeExpired())
+    }, {
+      status: AuthMethodStatus.ACTIVE,
+      user_id: existingClassicCredentials.user_id,
+      activation_code: null,
+      name: existingClassicCredentials.name
+    });
 
       if (!result?.affected) {
         const message = {
@@ -267,6 +276,13 @@ export class ClassicAuthService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private calculateCreationDateOfTokenToBeExpired() {
+    return dayjs()
+      .utc()
+      .subtract(this.codeExpiresIn, 'seconds')
+      .toDate();
   }
 
   async startResetPassword (email: string) {

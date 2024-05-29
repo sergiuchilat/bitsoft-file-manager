@@ -16,15 +16,17 @@ export class IpFilterMiddleware implements NestMiddleware {
 
   async use(request: any, res: any, next: (error?: any) => void): Promise<void> {
     const ip = request.headers['x-forwarded-for'] ?? request.connection.remoteAddress;
-    const userUuid = request.user.uuid;
-
     const ipIsBlocked = await this.blockedIpRepository.exist({ where: { ip } });
 
     if (ipIsBlocked) {
       throw new ForbiddenException();
     }
 
-    await this.userRepository.update({ uuid: userUuid }, { last_login_ip: ip });
+    const userUuid = request.user?.uuid;
+
+    if (userUuid) {
+      await this.userRepository.update({ uuid: userUuid }, { last_login_ip: ip });
+    }
 
     next();
   }

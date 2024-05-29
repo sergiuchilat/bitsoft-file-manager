@@ -58,7 +58,7 @@ export class ClassicAuthEntity {
     user: UserEntity;
 
   @CreateDateColumn({
-    type: 'timestamp',
+    type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   public created_at: Date;

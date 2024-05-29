@@ -22,7 +22,7 @@ export default class DbConfigValidator {
     }
   }
 
-  private static validatePort(port: string) {
+  private static validatePort(port: string | number) {
     if (!(port && Number(port) > 0 && Number(port) < 2 ** 16 - 1)) {
       throw new Error('Invalid db port');
     }
