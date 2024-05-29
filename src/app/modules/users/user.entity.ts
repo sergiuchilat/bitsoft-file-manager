@@ -3,7 +3,7 @@ import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.
 import { OauthCredentialEntity } from '@/app/modules/auth/passport-js/entities/oauth-credential.entity';
 import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 
-@Entity ({name:'users'})
+@Entity ('users')
 export class UserEntity {
   @PrimaryGeneratedColumn ()
     id: number;
@@ -27,6 +27,7 @@ export class UserEntity {
   })
     email: string;
 
+
     @Column({
         nullable: false,
         default: UserStatusEnum.NEW
@@ -37,7 +38,7 @@ export class UserEntity {
     type: 'inet',
     nullable: true
   })
-  last_login_ip: string;
+    last_login_ip: string;
 
   @OneToOne (() => ClassicAuthEntity, (classicAuth) => classicAuth.user)
     classicAuth: ClassicAuthEntity;

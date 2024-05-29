@@ -82,7 +82,7 @@ export class ClassicAuthService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    console.log('classicAuthRegisterPayloadDto', classicAuthRegisterPayloadDto);
     try {
 
       let existingUser = await this.usersService.findExistingUser (
@@ -129,82 +129,37 @@ export class ClassicAuthService {
     }
   }
 
-  async register0 (classicAuthRegisterPayloadDto: ClassicAuthRegisterPayloadDto): Promise<ClassicAuthRegisterResponseDto> {
-    const activationCode = v4 ();
+    async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, language: Language) {
+        const message = {
+            message: this.i18n.t('auth.mail.activation', {
+                lang: language,
+            })
+        };
+        try {
+            const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email }});
 
+            if(!user) {
+                return message;
+            }
 
+            const activationCode = v4 ();
+            await this.classicAuthRepository.update({email: user.email},{
+                activation_code: activationCode,
+            });
 
-    try {
-      // check if Google Credentials already exist for this email
-      let existingUser = await this.usersService.findExistingUser (
-        classicAuthRegisterPayloadDto.email,
-        OauthProvider.CLASSIC
-      );
+            await this.mailerService.sendActivationEmail (
+                classicAuthActivateResendPayloadDto.email,
+                this.generateActivationLink(activationCode),
+                user.name
+            );
 
-      if (!existingUser) {
-        existingUser = await this.usersService.create (
-          classicAuthRegisterPayloadDto.email,
-          classicAuthRegisterPayloadDto.name
-        );
-      }
-
-      const registeredClassicCredentials = await this.classicAuthRepository.save({
-        ...classicAuthRegisterPayloadDto,
-        activation_code: activationCode,
-        status: AuthMethodStatus.NEW,
-        name: classicAuthRegisterPayloadDto.name,
-        password: await hash (classicAuthRegisterPayloadDto.password, 10),
-        user_id: existingUser.id
-      });
-
-
-      await this.mailerService.sendActivationEmail (
-        classicAuthRegisterPayloadDto.email,
-        this.generateActivationLink(activationCode),
-        classicAuthRegisterPayloadDto.name
-      );
-
-      return plainToInstance (
-        ClassicAuthRegisterResponseDto,
-        registeredClassicCredentials
-      );
-
-    } catch (e) {
-      throw new HttpException ('Error registering user', HttpStatus.CONFLICT);
+            return message;
+        } catch (e) {
+            throw new HttpException ('Error sending activation message', HttpStatus.BAD_REQUEST);
+        }
     }
-  }
 
-  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, language: Language) {
-    const message = {
-      message: this.i18n.t('auth.mail.activation', {
-        lang: language,
-      })
-    };
-    try {
-      const user = await this.classicAuthRepository.findOne({where: {email: classicAuthActivateResendPayloadDto.email }});
-
-      if(!user) {
-        return message;
-      }
-
-      const activationCode = v4 ();
-      await this.classicAuthRepository.update({email: user.email},{
-        activation_code: activationCode,
-      });
-
-      await this.mailerService.sendActivationEmail (
-        classicAuthActivateResendPayloadDto.email,
-        this.generateActivationLink(activationCode),
-        user.name
-      );
-
-      return message;
-    } catch (e) {
-      throw new HttpException ('Error sending activation message', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async activate (token: string, language: Language) {
+  async activate (token: string) {
 
     // await this.classicAuthRepository.delete ({
     //   status: AuthMethodStatusEnum.NEW,
