@@ -6,10 +6,6 @@ import {UsersController} from '@/app/modules/users/users.controller';
 
 export default [
   {
-    guard: ParseTokenMiddleware,
-    routes: PassportJsController,
-  },
-  {
     guard: IpFilterMiddleware,
     routes: ClassicAuthController,
   },

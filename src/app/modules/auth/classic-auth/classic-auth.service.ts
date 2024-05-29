@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
-import { DataSource, IsNull, MoreThan, Not } from 'typeorm';
+import {DataSource, IsNull, MoreThan, Not} from 'typeorm';
 import { ClassicAuthEntity } from '@/app/modules/auth/classic-auth/classic-auth.entity';
 import { ClassicAuthRepository } from '@/app/modules/auth/classic-auth/classic-auth.repository';
 import ClassicAuthLoginPayloadDto from '@/app/modules/auth/classic-auth/dto/classic-auth-login.payload.dto';
@@ -24,6 +24,7 @@ import {Request} from 'express';
 import {
   ClassicAuthRefreshTokenPayloadDto
 } from '@/app/modules/auth/classic-auth/dto/classic-auth-refresh-token.payload.dto';
+import {PassportJsService} from '@/app/modules/auth/passport-js/passport-js.service';
 
 dayjs.extend(utc);
 
@@ -38,6 +39,7 @@ export class ClassicAuthService {
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
+    private readonly passportJsService: PassportJsService,
   ) {
     this.codeExpiresIn = AppConfig.authProviders.classic.code_expires_in;
   }
@@ -116,15 +118,19 @@ export class ClassicAuthService {
         algorithms: ['RS256'],
         publicKey: AppConfig.jwt.publicKey,
       });
-      const existingUser = await this.classicAuthRepository.findOne({
-        where: {
-          email: payload.email,
-          user_id: Not(IsNull())
-        },
-        relations: ['user']
-      });
+      if(!payload.provider) {
+        const existingUser = await this.classicAuthRepository.findOne({
+          where: {
+            email: payload.email,
+            user_id: Not(IsNull())
+          },
+          relations: ['user']
+        });
 
-      return this.generateToken(existingUser, request);
+        return this.generateToken(existingUser, request);
+      }
+
+      return this.passportJsService.getNewToken(payload, request);
     } catch (e) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
