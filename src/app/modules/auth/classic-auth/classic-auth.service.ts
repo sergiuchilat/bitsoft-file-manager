@@ -21,6 +21,7 @@ import { UserEntity } from '@/app/modules/users/user.entity';
 import ClassicAuthActivateResendPayloadDto
   from '@/app/modules/auth/classic-auth/dto/classic-auth-activate-resend.payload.dto';
 import {I18nService} from 'nestjs-i18n';
+import {Language} from '@/app/enum/language.enum';
 
 @Injectable ()
 export class ClassicAuthService {
@@ -165,10 +166,10 @@ export class ClassicAuthService {
     }
   }
 
-  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, request: Request) {
+  async resendActivationEmail (classicAuthActivateResendPayloadDto :ClassicAuthActivateResendPayloadDto, language: Language) {
     const message = {
       message: this.i18n.t('auth.mail.activation', {
-        lang: request.headers['l-localization'] || 'en',
+        lang: language,
       })
     };
     try {
@@ -195,7 +196,7 @@ export class ClassicAuthService {
     }
   }
 
-  async activate (token: string, request: Request) {
+  async activate (token: string, language: Language) {
 
     // await this.classicAuthRepository.delete ({
     //   status: AuthMethodStatusEnum.NEW,
@@ -240,7 +241,7 @@ export class ClassicAuthService {
       if (!result?.affected) {
         const message = {
           message: this.i18n.t('auth.errors.invalid_token', {
-            lang: request.headers['l-localization'] || 'en',
+            lang: language,
           })
         };
         throw new HttpException (message, HttpStatus.NOT_FOUND);
@@ -259,7 +260,7 @@ export class ClassicAuthService {
       console.log('Error activate user', error);
       const message = {
         message: this.i18n.t('auth.errors.activate_user', {
-          lang: request.headers['l-localization'] || 'en',
+          lang: language,
         })
       };
       throw new HttpException (message, HttpStatus.CONFLICT);

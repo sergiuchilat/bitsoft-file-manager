@@ -7,10 +7,11 @@ import UsersListResponseDto from '@/app/modules/users/dto/user-item.response.dto
 import {PaginateResponseDto} from '@/app/response/dto/paginate-response.dto';
 import PaginatorConfigInterface from '@/database/interfaces/paginator-config.interface';
 import {UserPaginatorDto} from '@/app/modules/users/dto/user-paginator.dto';
+import {Language} from '@/app/enum/language.enum';
 
 export interface UserRepository {
   findAllAndCount(pageOptionsDto: PaginatorConfigInterface): Promise<[UserEntity[], number]>
-  findByUUID(uuid: string): Promise<UserEntity>;
+  findByUUID(uuid: string, language: Language): Promise<UserEntity>;
   findByUUIDWithAuthMethods(uuid: string): Promise<UserEntity>;
   block(uuid: string): Promise<UpdateResult>;
   unblock(uuid: string): Promise<UpdateResult>;
@@ -42,13 +43,13 @@ export class UsersRepository extends Repository<UserEntity> {
     return new PaginateResponseDto(userPaginatorDto, response);
   }
 
-  async findByUUID (uuid: string, request: Request)  {
+  async findByUUID (uuid: string, language: Language)  {
     const user = await this.findOne({where: {uuid}});
 
     if(!user) {
       const message = {
         message: this.i18n.t('auth.errors.user_not_found', {
-          lang: request.headers['l-localization'] || 'en',
+          lang: language,
           args: {uuid}
         })
       };

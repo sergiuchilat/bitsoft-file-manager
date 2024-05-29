@@ -8,6 +8,7 @@ import {UserStatusEnum} from '@/app/modules/common/enums/user-status.enum';
 import {EntityManager} from 'typeorm';
 import {PaginateResponseDto} from '@/app/response/dto/paginate-response.dto';
 import {UserPaginatorDto} from '@/app/modules/users/dto/user-paginator.dto';
+import {Language} from '@/app/enum/language.enum';
 
 @Injectable ()
 export class UsersService {
@@ -21,8 +22,8 @@ export class UsersService {
     return await this.usersRepository.findAllAndCount(userPaginatorDto);
   }
 
-  async getByUUID (uuid: string, request: Request) {
-    return this.usersRepository.findByUUID(uuid, request);
+  async getByUUID (uuid: string, language: Language) {
+    return this.usersRepository.findByUUID(uuid, language);
   }
 
   async block (uuid: string) {

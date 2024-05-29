@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import {Request, Response} from 'express';
 import {Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClassicAuthService } from './classic-auth.service';
@@ -50,7 +50,7 @@ export class ClassicAuthController {
   ) {
     response
       .status (HttpStatus.OK)
-      .send (await this.classicAuthService.activate (token, request));
+      .send (await this.classicAuthService.activate (token, request.localization));
   }
 
   @ApiOperation ({summary: 'Resend activation email'})
@@ -62,7 +62,7 @@ export class ClassicAuthController {
   ) {
     return response
       .status (HttpStatus.OK)
-      .send (await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto, request));
+      .send (await this.classicAuthService.resendActivationEmail(classicAuthActivateResendPayloadDto, request.localization));
   }
 
   @ApiOperation ({summary: 'Request password reset(---! needs to be implemented)'})
