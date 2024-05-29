@@ -112,29 +112,29 @@ export class ClassicAuthService {
     }
   }
 
-    async refreshToken (classicAuthRefreshTokenPayloadDto: ClassicAuthRefreshTokenPayloadDto, request: Request) {
-        try {
-            const payload = this.jwtService.verify(classicAuthRefreshTokenPayloadDto.refreshToken, {
-                algorithms: ['RS256'],
-                publicKey: AppConfig.jwt.publicKey,
-            });
-            if(!payload.provider) {
-                const existingUser = await this.classicAuthRepository.findOne({
-                    where: {
-                        email: payload.email,
-                        user_id: Not(IsNull())
-                    },
-                    relations: ['user']
-                });
+  async refreshToken (classicAuthRefreshTokenPayloadDto: ClassicAuthRefreshTokenPayloadDto, request: Request) {
+    try {
+      const payload = this.jwtService.verify(classicAuthRefreshTokenPayloadDto.refreshToken, {
+        algorithms: ['RS256'],
+        publicKey: AppConfig.jwt.publicKey,
+      });
+      if(!payload.provider) {
+        const existingUser = await this.classicAuthRepository.findOne({
+          where: {
+            email: payload.email,
+            user_id: Not(IsNull())
+          },
+          relations: ['user']
+        });
 
-                return this.generateToken(existingUser, request);
-            }
+        return this.generateToken(existingUser, request);
+      }
 
-            return this.passportJsService.getNewToken(payload, request);
-        } catch (e) {
-            throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
-        }
+      return this.passportJsService.getNewToken(payload, request);
+    } catch (e) {
+      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
+  }
 
   async activate (token: string) {
 
