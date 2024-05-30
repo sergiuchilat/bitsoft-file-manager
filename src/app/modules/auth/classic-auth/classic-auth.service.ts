@@ -142,14 +142,13 @@ export class ClassicAuthService {
       where: {
         activation_code: token,
         status: AuthMethodStatus.NEW
-      }
+      },
+      relations: ['user']
     });
 
     if (!existingClassicCredentials) {
       throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
     }
-
-
 
     const result = await this.classicAuthRepository.update ({
       activation_code: token,
@@ -166,8 +165,23 @@ export class ClassicAuthService {
       throw new HttpException ('Invalid token', HttpStatus.NOT_FOUND);
     }
 
+    const activationToken = this.jwtService.sign (TokenGeneratorService.generatePayload (
+      existingClassicCredentials.user.uuid,
+      OauthProvider.CLASSIC,
+      {
+        email: existingClassicCredentials.user.email,
+        name: existingClassicCredentials.user.name,
+        isActive: existingClassicCredentials.status === AuthMethodStatus.ACTIVE,
+      }
+    ), {
+      secret: AppConfig.jwt.privateKey,
+      expiresIn: AppConfig.jwt.expiresIn,
+      algorithm: 'RS256'
+    });
+
     return {
       token: token,
+      activation_token: activationToken,
       status: AuthMethodStatus.ACTIVE
     };
   }
