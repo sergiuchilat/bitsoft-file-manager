@@ -20,6 +20,7 @@ import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status'
 import { UserEntity } from '@/app/modules/users/user.entity';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { TokenType } from '@/app/modules/common/enums/token-type.enum';
 
 dayjs.extend(utc);
 
@@ -51,6 +52,7 @@ export class ClassicAuthService {
     if (existingUser && passwordMatch) {
       return {
         token: this.jwtService.sign (TokenGeneratorService.generatePayload (
+          TokenType.ACCESS,
           existingUser.user.uuid,
           OauthProvider.CLASSIC,
           {
@@ -166,6 +168,7 @@ export class ClassicAuthService {
     }
 
     const activationToken = this.jwtService.sign (TokenGeneratorService.generatePayload (
+      TokenType.ACTIVATION,
       existingClassicCredentials.user.uuid,
       OauthProvider.CLASSIC,
       {
