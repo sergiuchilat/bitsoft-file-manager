@@ -3,6 +3,7 @@ import { DbDriver } from '../interfaces/components/db-config.interface';
 import { generateDatabaseUrl } from '@/config/services/db.service';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
+import * as process from 'node:process';
 
 dotenv.config();
 
@@ -11,11 +12,11 @@ export default class EnvConfigStrategy {
 
   constructor() {
     //console.log('process ENV', process.env);
-    let JWT_PUBLIC_KEY = '';
-    let JWT_PRIVATE_KEY = '';
+    let JWT_PUBLIC_KEY = null;
+    let JWT_PRIVATE_KEY = null;
     try {
-      JWT_PUBLIC_KEY = fs.readFileSync(process.env.JWT_PUBLIC_KEY_PATH ?? '', 'utf8');
-      JWT_PRIVATE_KEY = fs.readFileSync(process.env.JWT_PRIVATE_KEY_PATH ?? '', 'utf8');
+      JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY ?? fs.readFileSync(process.env.JWT_PUBLIC_KEY_PATH ?? '', 'utf8');
+      JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY ?? fs.readFileSync(process.env.JWT_PRIVATE_KEY_PATH ?? '', 'utf8');
     } catch (e) {
       console.log('Error reading JWT_PUBLIC_KEY_PATH', e.message);
     }
@@ -63,7 +64,7 @@ export default class EnvConfigStrategy {
       },
       db: {
         host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
+        port: parseInt(process.env.DB_PORT),
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         name: process.env.DB_NAME,

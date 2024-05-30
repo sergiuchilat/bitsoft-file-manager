@@ -1,8 +1,9 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from '@/app/modules/users/entities/user.entity';
-import { AuthMethodStatusEnum } from '@/app/modules/common/auth-method-status.enum';
 
-@Entity('auth_credentials_classic')
+import { UserEntity } from '@/app/modules/users/user.entity';
+import { AuthMethodStatus } from '@/app/modules/common/enums/auth-method.status';
+
+@Entity('credentials_classic')
 export class ClassicAuthEntity {
   @PrimaryGeneratedColumn()
     id: number;
@@ -21,10 +22,16 @@ export class ClassicAuthEntity {
     password: string;
 
   @Column({
-    nullable: false,
-    default: AuthMethodStatusEnum.NEW
+    length: 255,
+    nullable: true,
   })
-    status: AuthMethodStatusEnum;
+    name: string;
+
+  @Column({
+    nullable: false,
+    default: AuthMethodStatus.NEW
+  })
+    status: AuthMethodStatus;
 
   @Column({
     nullable: true,
@@ -33,7 +40,13 @@ export class ClassicAuthEntity {
     activation_code: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
+    length: 36
+  })
+    reset_password_code: string;
+
+  @Column({
+    nullable: true,
   })
     user_id: number;
 
@@ -45,7 +58,7 @@ export class ClassicAuthEntity {
     user: UserEntity;
 
   @CreateDateColumn({
-    type: 'timestamp',
+    type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   public created_at: Date;

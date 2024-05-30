@@ -1,13 +1,20 @@
-import { AuthMethodsEnum } from '@/app/modules/common/auth-methods.enum';
-import { use } from 'passport';
+import { TokenType } from '@/app/modules/common/enums/token-type.enum';
 
 export class TokenGeneratorService {
-  static generatePayload (sub: string, authMethod: AuthMethodsEnum, user: any): any{
+  static generatePayload (
+    type: TokenType,
+    sub: string,
+    authProvider: string,
+    user: any
+  ): any{
     return  {
       props: {
-        authMethod,
+        authProvider,
+        type,
         email: user.email,
-        name: user.name
+        name: user.name,
+        photo: user.photo,
+        isActive: user.isActive,
       },
       sub
     };
