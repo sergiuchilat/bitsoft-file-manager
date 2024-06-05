@@ -8,7 +8,6 @@ import TypeormConnector from '@/database/connectors/typeorm.connector';
 import { PassportModule } from '@nestjs/passport';
 import {JwtModule} from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '@/app/modules/users/user.entity';
 import { BlockedIpEntity } from '@/app/modules/blocked-ip/entities/blocked-ip.entity';
 
 @Module ({
@@ -19,7 +18,7 @@ import { BlockedIpEntity } from '@/app/modules/blocked-ip/entities/blocked-ip.en
     EventEmitterConfig,
     JwtModule,
     PassportModule.register({session: true}),
-    TypeOrmModule.forFeature([UserEntity, BlockedIpEntity])
+    TypeOrmModule.forFeature([BlockedIpEntity])
   ],
   providers: [SeedService],
 })
