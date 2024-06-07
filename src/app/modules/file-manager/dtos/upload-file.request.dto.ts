@@ -1,8 +1,8 @@
 import { StorageProviderName } from '@/app/modules/file-manager/storage-providers/enums/storage.provider.name.enum';
-import { AccessLevel } from '@/app/modules/file-manager/access-management/enums/access-level.enum';
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsDate, IsEnum, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsDate, IsEnum, IsString, IsUUID, Matches, ValidateNested } from 'class-validator';
+import { AccessType } from '@/app/modules/file-manager/access-management/enums/access-type.enum';
 
 export class BasicAccessDTO {
   @ApiProperty({
@@ -21,9 +21,9 @@ export class UserAccessDTO {
   @IsUUID()
   @ApiProperty()
   user_uuid: string;
-  @IsEnum(AccessLevel)
+  @IsEnum(AccessType)
   @ApiProperty()
-  level: AccessLevel;
+  type: AccessType;
   @IsUUID()
   @ApiProperty()
   until?: Date;
@@ -49,7 +49,6 @@ export class AccessDTO {
 }
 
 export class UploadFileRequestDto {
-  //todo blob content
   @Expose()
   @ApiProperty()
   @IsString()
@@ -65,6 +64,7 @@ export class UploadFileRequestDto {
   @Expose()
   @ApiProperty()
   @IsString() //todo validation pattern
+  @Matches(/^[\w\-/]+$/)
   folder: string;
   @Expose()
   @ApiProperty()
